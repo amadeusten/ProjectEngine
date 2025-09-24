@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <base target="_top">
+    <!-- Load Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles for the drawer transition */
+        #advanced-drawer {
+            transition: transform 0.3s ease-in-out;
+        }
+        /* Style for active option buttons */
+        .option-btn.active {
+            background-color: #2563eb; /* Corresponds to Tailwind's blue-600 */
+            color: white;
+        }
+        /* Remove arrows from number inputs */
+        input[type=number]::-webkit-inner-spin-button,
+        input[type=number]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+        /* Style for remove buttons */
+        .remove-row-btn {
+            color: #ef4444;
+            cursor: pointer;
+            font-size: 14px;
+            line-height: 1;
+        }
+        .remove-row-btn:hover {
+            color: #dc2626;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
+
+    <div class="w-full max-w-2xl shadow-lg rounded-lg overflow-hidden bg-white">
+        <div class="flex">
+            <!-- Main Content -->
+            <div class="flex-grow p-6">
+                <h1 class="text-lg font-semibold text-gray-800 mb-4">Apparel / Screen Printing</h1>
+
+                <!-- Description and Quantity Section -->
+                <div class="grid grid-cols-12 gap-x-4 mb-4 items-start">
+                    <div class="col-span-8">
+                        <label class="text-xs font-medium text-gray-700 block text-left mb-1">Description</label>
+                        <input id="description" type="text" class="block w-full px-2 py-1 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-xs" placeholder="Description" />
+                    </div>
+                    <div class="col-span-4">
+                        <label class="text-xs font-medium text-gray-700 block text-left mb-1">Quantity</label>
+                        <input id="quantity" type="number" class="block w-full px-2 py-1 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-xs" placeholder="Qty" min="1" step="1" />
+                    </div>
+                </div>
+
+                <!-- Garment Section -->
+                <div class="mb-4">
+                    <div class="grid grid-cols-12 gap-x-4 items-end">
+                        <div class="col-span-6">
+                            <label class="text-xs font-medium text-gray-700 block text-left mb-1">Garment</label>
+                            <input id="garment-input" type="text" class="block w-full px-2 py-1 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-xs" placeholder="Garment Selection" />
+                        </div>
+                        <div class="col-span-3">
+                            <label class="text-xs font-medium text-gray-700 block text-left mb-1">Unit Cost</label>
+                            <input id="garment-unit-cost" type="number" class="block w-full px-2 py-1 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-xs" placeholder="$" step="0.01" />
+                        </div>
+                        <div class="col-span-3">
+                            <label class="text-xs font-medium text-gray-700 block text-left mb-1">Total</label>
+                            <input id="garment-total" type="number" class="block w-full px-2 py-1 bg-gray-100 border border-gray-300 rounded-md shadow-sm text-xs" placeholder="$ Total" disabled />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Imprint Details Section -->
+                <div class="mb-4">
+                    <h3 class="text-xs font-medium text-gray-700 mb-3">Imprint Details</h3>
+                    
+                    <!-- Front and Back Colors -->
+                    <div class="grid grid-cols-2 gap-x-4 mb-3">
+                        <div>
+                            <label class="text-xs font-medium text-gray-700 block text-left mb-1">Front # of Colors</label>
+                            <input id="front-colors" type="number" class="block w-full px-2 py-1 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-xs" placeholder="Qty - Front Color" min="0" step="1" value="0" />
+                        </div>
+                        <div>
+                            <label class="text-xs font-medium text-gray-700 block text-left mb-1">Back # of Colors</label>
+                            <input id="back-colors" type="number" class="block w-full px-2 py-1 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-xs" placeholder="Qty - Back Color" min="0" step="1" value="0" />
+                        </div>
+                    </div>
+
+                    <!-- Add Print Location Link -->
+                    <div class="mb-3">
+                        <button id="add-print-location-link" class="text-blue-600 text-xs font-semibold flex items-center gap-2 hover:text-blue-800">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                            Add Print Location
+                        </button>
+                    </div>
+
+                    <!-- Additional Locations Section (Hidden by default) -->
+                    <div id="additional-locations-section" class="hidden">
+                        <h4 class="text-xs font-medium text-gray-700 mb-2">Additional Locations</h4>
+                        <div id="additional-locations-container">
+                            <!-- Additional location rows will be added here dynamically -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Summary Box -->
+                <div class="flex flex-col justify-between rounded-md bg-gray-100 p-3 mt-auto">
+                   <div class="grid sm:grid-cols-[1fr_auto_1fr] items-center gap-x-4 gap-y-3 h-full">
+                        <div class="space-y-2">
+                            <div class="grid grid-cols-2 items-center gap-x-3">
+                                <div class="text-xs text-left font-medium">Total Cost</div>
+                                <div id="total-cost" class="text-xs text-left font-semibold">$0.00</div>
+                            </div>
+                            <div class="grid grid-cols-2 items-center gap-x-3">
+                                <div class="text-xs text-left font-medium">Margin</div>
+                                <div class="relative w-16">
+                                    <input id="margin" type="number" value="40" step="1" class="w-full h-6 pr-4 pl-2 border border-gray-300 rounded-md text-xs" />
+                                    <span class="absolute inset-y-0 right-0 flex items-center pr-1 text-gray-500 text-xs">%</span>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 items-center gap-x-3">
+                                <div class="text-xs text-left font-medium">Total Price</div>
+                                <div id="total-price" class="text-xs text-left font-semibold">$0.00</div>
+                            </div>
+                            <div class="grid grid-cols-2 items-center gap-x-3">
+                                <div class="text-xs text-left font-medium">Unit Price</div>
+                                <div id="unit-price" class="text-xs text-left font-semibold">$0.00</div>
+                            </div>
+                            <div class="grid grid-cols-2 items-center gap-x-3">
+                                <div class="text-xs text-left font-medium">Net Income</div>
+                                <div id="net-income" class="text-xs text-left font-semibold">$0.00</div>
+                            </div>
+                        </div>
+                        <div class="hidden sm:flex justify-center h-full">
+                            <div class="border-l border-gray-300"></div>
+                        </div>
+                        <div class="flex flex-col justify-center items-center gap-2">
+                            <button id="add-to-project-btn" class="w-full bg-blue-600 text-white px-4 py-1.5 rounded-md text-xs font-medium hover:bg-blue-700">Add to Project</button>
+                            <button id="reset-btn" class="w-full bg-gray-300 text-gray-700 px-4 py-1.5 rounded-md text-xs font-medium hover:bg-gray-400">Reset</button>
+                        </div>
+                   </div>
+                </div>
+
+            </div>
+            
+            <!-- Drawer Trigger -->
+            <div id="drawer-trigger" class="flex-shrink-0 bg-gray-50 hover:bg-gray-200 transition-colors cursor-pointer flex items-center justify-center w-10" style="box-shadow: -4px 0 12px -4px rgba(0,0,0,0.05)">
+                <div class="flex flex-col items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-500"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                    <span class="text-xs font-medium text-gray-500" style="writing-mode: vertical-rl; text-orientation: mixed; transform: rotate(180deg);">Advanced Settings</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Additional Options Drawer -->
+    <div id="advanced-drawer" class="fixed top-0 right-0 h-full w-80 bg-white shadow-xl p-4 transform translate-x-full z-50">
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-base font-semibold">Additional Options</h2>
+            <button id="close-drawer-btn" class="text-gray-500 hover:text-gray-800 text-2xl">&times;</button>
+        </div>
+        
+        <!-- Additional Options Content -->
+        <div class="space-y-0">
+            <!-- Oversized -->
+            <div class="py-3">
+                <div class="flex items-center space-x-3">
+                    <input type="checkbox" id="oversized-checkbox" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                    <label for="oversized-checkbox" class="text-sm text-gray-700 font-medium">Oversized</label>
+                </div>
+                <div class="ml-7 text-xs text-gray-500 mt-1">+$1.00 per unit</div>
+            </div>
+            <hr class="border-gray-200">
+            
+            <!-- Color Change with dropdown -->
+            <div class="py-3">
+                <div class="space-y-2">
+                    <div class="flex items-center space-x-3">
+                        <input type="checkbox" id="color-change-checkbox" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                        <label for="color-change-checkbox" class="text-sm text-gray-700 font-medium">Color Change</label>
+                    </div>
+                    <div class="ml-7 text-xs text-gray-500">+$5.00 per color</div>
+                    <div id="color-change-dropdown" class="ml-7 hidden mt-2">
+                        <select id="color-change-quantity" class="block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm">
+                            <option value="1">1 Color</option>
+                            <option value="2">2 Colors</option>
+                            <option value="3">3 Colors</option>
+                            <option value="4">4 Colors</option>
+                            <option value="5">5 Colors</option>
+                            <option value="6">6 Colors</option>
+                            <option value="7">7 Colors</option>
+                            <option value="8">8 Colors</option>
+                            <option value="9">9 Colors</option>
+                            <option value="10">10 Colors</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <hr class="border-gray-200">
+            
+            <!-- Poly/Nylon/Spandex/Mesh -->
+            <div class="py-3">
+                <div class="flex items-center space-x-3">
+                    <input type="checkbox" id="poly-nylon-checkbox" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                    <label for="poly-nylon-checkbox" class="text-sm text-gray-700 font-medium">Poly/Nylon/Spandex/Mesh</label>
+                </div>
+                <div class="ml-7 text-xs text-gray-500 mt-1">+$0.25 per unit</div>
+            </div>
+            <hr class="border-gray-200">
+            
+            <!-- Metallic Shimmer Ink -->
+            <div class="py-3">
+                <div class="flex items-center space-x-3">
+                    <input type="checkbox" id="metallic-shimmer-checkbox" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                    <label for="metallic-shimmer-checkbox" class="text-sm text-gray-700 font-medium">Metallic Shimmer Ink</label>
+                </div>
+                <div class="ml-7 text-xs text-gray-500 mt-1">+$0.50 per unit</div>
+            </div>
+            <hr class="border-gray-200">
+            
+            <!-- Glow -->
+            <div class="py-3">
+                <div class="flex items-center space-x-3">
+                    <input type="checkbox" id="glow-checkbox" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                    <label for="glow-checkbox" class="text-sm text-gray-700 font-medium">Glow</label>
+                </div>
+                <div class="ml-7 text-xs text-gray-500 mt-1">+$1.25 per unit</div>
+            </div>
+            <hr class="border-gray-200">
+            
+            <!-- Fleece -->
+            <div class="py-3">
+                <div class="flex items-center space-x-3">
+                    <input type="checkbox" id="fleece-checkbox" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                    <label for="fleece-checkbox" class="text-sm text-gray-700 font-medium">Fleece</label>
+                </div>
+                <div class="ml-7 text-xs text-gray-500 mt-1">+$0.25 per unit</div>
+            </div>
+            <hr class="border-gray-200">
+            
+            <!-- Design Labor -->
+            <div class="py-3">
+                <div class="space-y-2">
+                    <div class="flex items-center space-x-3">
+                        <input type="checkbox" id="design-labor-checkbox" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                        <label for="design-labor-checkbox" class="text-sm text-gray-700 font-medium">Design Labor</label>
+                    </div>
+                    <div class="ml-7 text-xs text-gray-500">$60.00 per hour</div>
+                    <div id="design-labor-inputs" class="ml-7 hidden mt-2">
+                        <div class="flex gap-x-2">
+                            <input type="number" id="design-labor-quantity" class="w-20 px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm" placeholder="0" min="0" step="0.1" />
+                            <select id="design-labor-unit" class="px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm">
+                                <option value="hours">Hours</option>
+                                <option value="minutes">Minutes</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // === GLOBAL VARIABLES ===
+            let additionalLocationCounter = 0;
+            let isEditMode = false;
+            let originalRowNumber = null;
+
+            // === PRICING DATA (Hardcoded) ===
+            const pricingTiers = [
+                { min: 1, max: 12, prices: [0.00, 3.15, 3.46, 3.67, 3.94] },
+                { min: 13, max: 35, prices: [0.00, 2.10, 2.41, 2.62, 2.77, 3.08] },
+                { min: 36, max: 75, prices: [0.00, 1.57, 1.89, 2.10, 2.35, 2.56, 2.77, 2.98, 3.19] },
+                { min: 76, max: 150, prices: [0.00, 1.38, 1.75, 1.96, 2.18, 2.46, 2.69, 2.92, 3.05] },
+                { min: 151, max: 250, prices: [0.00, 1.01, 1.32, 1.42, 1.55, 1.66, 1.78, 1.92, 2.02] },
+                { min: 251, max: 500, prices: [0.00, 0.89, 1.08, 1.12, 1.18, 1.29, 1.33, 1.43, 1.54] },
+                { min: 501, max: 1000, prices: [0.00, 0.75, 0.87, 0.86, 0.91, 0.96, 1.01, 1.07, 1.12] },
+                { min: 1001, max: 2500, prices: [0.00, 0.69, 0.75, 0.77, 0.84, 0.91, 0.96, 1.01, 1.07] },
+                { min: 2501, max: 5000, prices: [0.00, 0.52, 0.57, 0.69, 0.68, 0.73, 0.78, 0.84, 0.89] }
+            ];
+
+            // === CONSTANTS ===
+            const constants = {
+                screenSetup: 13, // Per color
+                oversize: 1, // Per unit
+                colorChange: 5, // Per color
+                pocketPrint: 0.10, // Per unit
+                sleevePrint: 0.25, // Per unit
+                polyNylonSpandexMesh: 0.25, // Per unit
+                metallicShimmerInk: 0.50, // Per unit
+                glow: 1.25, // Per unit
+                fleece: 0.25, // Per unit
+                designLabor: 60 // Per hour
+            };
+
+            // === LOCATION UPCHARGES ===
+            const locationUpcharges = {
+                'sleeve': constants.sleevePrint,
+                'pocket': constants.pocketPrint,
+                'tag': 0,
+                'back-collar': 0
+            };
+
+            // === DOM ELEMENTS ===
+            const drawer = document.getElementById('advanced-drawer');
+            const drawerTrigger = document.getElementById('drawer-trigger');
+            const closeDrawerBtn = document.getElementById('close-drawer-btn');
+            const resetBtn = document.getElementById('reset-btn');
+            const addToProjectBtn = document.getElementById('add-to-project-btn');
+            const addPrintLocationLink = document.getElementById('add-print-location-link');
+            const additionalLocationsSection = document.getElementById('additional-locations-section');
+            const additionalLocationsContainer = document.getElementById('additional-locations-container');
+
+            // === EDIT MODE INITIALIZATION ===
+            // Check if we're in edit mode
+            if (window.editFormData) {
+                isEditMode = true;
+                originalRowNumber = window.editFormData.originalRowNumber;
+                
+                // Update the button text and title to reflect edit mode
+                addToProjectBtn.textContent = 'Update Project';
+                document.querySelector('h1').textContent = 'Edit Apparel Estimate';
+                
+                // Populate the form with edit data after a brief delay to ensure DOM is ready
+                setTimeout(() => populateFormData(window.editFormData), 100);
+            }
+
+            // === UTILITY FUNCTIONS ===
+
+            /**
+             * Gets the pricing tier based on quantity
+             * @param {number} quantity - The order quantity
+             * @returns {object} The pricing tier object
+             */
+            function getPricingTier(quantity) {
+                for (let tier of pricingTiers) {
+                    if (quantity >= tier.min && quantity <= tier.max) {
+                        return tier;
+                    }
+                }
+                return pricingTiers[pricingTiers.length - 1];
+            }
+
+            /**
+             * Gets the unit print price for a specific number of colors and quantity
+             * @param {number} colors - Number of colors for this location
+             * @param {number} quantity - Total order quantity
+             * @returns {number} Unit price for printing
+             */
+            function getUnitPrintPrice(colors, quantity) {
+                const tier = getPricingTier(quantity);
+                if (colors >= tier.prices.length) {
+                    return tier.prices[tier.prices.length - 1];
+                }
+                return tier.prices[colors] || 0;
+            }
+
+            /**
+             * Calculates the total cost for a print location
+             * @param {number} colors - Number of colors
+             * @param {number} quantity - Total quantity
+             * @param {string} location - Location type (for upcharge calculation)
+             * @returns {number} Total cost for this location
+             */
+            function calculateLocationCost(colors, quantity, location = '') {
+                if (colors <= 0) return 0;
+                
+                const unitPrintPrice = getUnitPrintPrice(colors, quantity);
+                const locationUpcharge = locationUpcharges[location] || 0;
+                const totalUnitCost = unitPrintPrice + locationUpcharge;
+                
+                return totalUnitCost * quantity;
+            }
+
+            /**
+             * Updates all calculations in the form
+             */
+            function updateCalculations() {
+                const quantityElement = document.getElementById('quantity');
+                const garmentUnitCostElement = document.getElementById('garment-unit-cost');
+                const marginElement = document.getElementById('margin');
+                const garmentTotalElement = document.getElementById('garment-total');
+                
+                if (!quantityElement || !garmentUnitCostElement || !marginElement || !garmentTotalElement) {
+                    console.error('Required elements not found for calculations');
+                    return;
+                }
+                
+                const quantity = parseInt(quantityElement.value) || 0;
+                const garmentUnitCost = parseFloat(garmentUnitCostElement.value) || 0;
+                const margin = parseFloat(marginElement.value) || 0;
+
+                if (quantity <= 0) {
+                    garmentTotalElement.value = '0.00';
+                    const elements = {
+                        'total-cost': '$0.00',
+                        'total-price': '$0.00',
+                        'unit-price': '$0.00',
+                        'net-income': '$0.00'
+                    };
+                    
+                    Object.entries(elements).forEach(([id, value]) => {
+                        const element = document.getElementById(id);
+                        if (element) element.textContent = value;
+                    });
+                    return;
+                }
+
+                // Calculate garment total
+                const garmentTotal = quantity * garmentUnitCost;
+                garmentTotalElement.value = garmentTotal.toFixed(2);
+
+                // Calculate print costs
+                const frontColorsElement = document.getElementById('front-colors');
+                const backColorsElement = document.getElementById('back-colors');
+                
+                const frontColors = frontColorsElement ? (parseInt(frontColorsElement.value) || 0) : 0;
+                const backColors = backColorsElement ? (parseInt(backColorsElement.value) || 0) : 0;
+                
+                let totalPrintCosts = 0;
+                let totalColors = 0;
+
+                // Front location cost
+                if (frontColors > 0) {
+                    totalPrintCosts += calculateLocationCost(frontColors, quantity, 'front');
+                    totalColors += frontColors;
+                }
+
+                // Back location cost  
+                if (backColors > 0) {
+                    totalPrintCosts += calculateLocationCost(backColors, quantity, 'back');
+                    totalColors += backColors;
+                }
+                
+                // Calculate additional location costs
+                document.querySelectorAll('.additional-location-row').forEach(row => {
+                    const locationSelect = row.querySelector('.location-select');
+                    const colorsInput = row.querySelector('.location-qty');
+                    
+                    if (locationSelect && colorsInput) {
+                        const location = locationSelect.value;
+                        const colors = parseInt(colorsInput.value) || 0;
+                        
+                        if (location && colors > 0) {
+                            totalPrintCosts += calculateLocationCost(colors, quantity, location);
+                            totalColors += colors;
+                        }
+                    }
+                });
+
+                // Calculate screen setup costs
+                const screenSetupCosts = totalColors * constants.screenSetup;
+
+                // Calculate additional options costs
+                let additionalOptionsCosts = 0;
+                
+                // Oversized
+                const oversizedCheckbox = document.getElementById('oversized-checkbox');
+                if (oversizedCheckbox && oversizedCheckbox.checked) {
+                    additionalOptionsCosts += constants.oversize * quantity;
+                }
+                
+                // Color Change
+                const colorChangeCheckbox = document.getElementById('color-change-checkbox');
+                const colorChangeQuantityElement = document.getElementById('color-change-quantity');
+                if (colorChangeCheckbox && colorChangeCheckbox.checked && colorChangeQuantityElement) {
+                    const colorChangeQuantity = parseInt(colorChangeQuantityElement.value) || 1;
+                    additionalOptionsCosts += constants.colorChange * colorChangeQuantity;
+                }
+                
+                // Other checkboxes
+                const checkboxes = [
+                    { id: 'poly-nylon-checkbox', cost: constants.polyNylonSpandexMesh },
+                    { id: 'metallic-shimmer-checkbox', cost: constants.metallicShimmerInk },
+                    { id: 'glow-checkbox', cost: constants.glow },
+                    { id: 'fleece-checkbox', cost: constants.fleece }
+                ];
+                
+                checkboxes.forEach(({ id, cost }) => {
+                    const checkbox = document.getElementById(id);
+                    if (checkbox && checkbox.checked) {
+                        additionalOptionsCosts += cost * quantity;
+                    }
+                });
+                
+                // Design Labor with time calculation
+                const designLaborCheckbox = document.getElementById('design-labor-checkbox');
+                const designLaborQuantityElement = document.getElementById('design-labor-quantity');
+                const designLaborUnitElement = document.getElementById('design-labor-unit');
+                
+                if (designLaborCheckbox && designLaborCheckbox.checked && designLaborQuantityElement && designLaborUnitElement) {
+                    const laborQuantity = parseFloat(designLaborQuantityElement.value) || 0;
+                    const unit = designLaborUnitElement.value;
+                    
+                    let hours = laborQuantity;
+                    if (unit === 'minutes') {
+                        hours = laborQuantity / 60;
+                    }
+                    
+                    additionalOptionsCosts += constants.designLabor * hours;
+                }
+
+                // Calculate total cost
+                const totalCost = garmentTotal + totalPrintCosts + screenSetupCosts + additionalOptionsCosts;
+                
+                // Calculate total price with margin: Total Price = Total Cost / (1 - Margin)
+                const marginDecimal = margin / 100;
+                let totalPrice = 0;
+                if (marginDecimal < 1 && marginDecimal >= 0) {
+                    totalPrice = totalCost / (1 - marginDecimal);
+                } else if (marginDecimal < 0) {
+                    totalPrice = totalCost / (1 - marginDecimal);
+                } else {
+                    totalPrice = totalCost;
+                }
+                
+                const unitPrice = quantity > 0 ? totalPrice / quantity : 0;
+                const netIncome = totalPrice - totalCost;
+
+                // Update display
+                const displayElements = [
+                    { id: 'total-cost', value: totalCost },
+                    { id: 'total-price', value: totalPrice },
+                    { id: 'unit-price', value: unitPrice },
+                    { id: 'net-income', value: netIncome }
+                ];
+                
+                displayElements.forEach(({ id, value }) => {
+                    const element = document.getElementById(id);
+                    if (element) {
+                        element.textContent = `${value.toFixed(2)}`;
+                    }
+                });
+            }
+
+            /**
+             * Adds a new additional location row
+             */
+            function addAdditionalLocationRow() {
+                additionalLocationCounter++;
+                const rowId = `location-row-${additionalLocationCounter}`;
+                
+                const row = document.createElement('div');
+                row.className = 'grid grid-cols-2 gap-x-4 mt-2 additional-location-row';
+                row.id = rowId;
+                row.innerHTML = `
+                    <div>
+                        <select class="location-select block w-full px-2 py-1 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-xs">
+                            <option value="">Select Location</option>
+                            <option value="sleeve">Sleeve</option>
+                            <option value="pocket">Pocket</option>
+                            <option value="tag">Tag</option>
+                            <option value="back-collar">Back Collar</option>
+                        </select>
+                    </div>
+                    <div class="flex gap-x-2">
+                        <input type="number" class="location-qty flex-1 px-2 py-1 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-xs" placeholder="# Colors" min="0" step="1" />
+                        <button class="remove-row-btn px-1 text-red-500 hover:text-red-700 text-xs" onclick="removeAdditionalLocationRow('${rowId}')" title="Remove location">
+                            ×
+                        </button>
+                    </div>
+                `;
+
+                additionalLocationsContainer.appendChild(row);
+
+                // Add event listeners
+                const locationSelect = row.querySelector('.location-select');
+                const colorsInput = row.querySelector('.location-qty');
+                
+                if (locationSelect) locationSelect.addEventListener('change', updateCalculations);
+                if (colorsInput) colorsInput.addEventListener('input', updateCalculations);
+            }
+
+            /**
+             * Removes an additional location row
+             */
+            function removeAdditionalLocationRow(rowId) {
+                const row = document.getElementById(rowId);
+                if (row) {
+                    row.remove();
+                    updateCalculations();
+                    
+                    if (additionalLocationsContainer.children.length === 0) {
+                        additionalLocationsSection.classList.add('hidden');
+                    }
+                }
+            }
+            window.removeAdditionalLocationRow = removeAdditionalLocationRow;
+
+            /**
+             * Collects all form data for logging purposes
+             */
+            function collectFormData() {
+                const formData = {
+                    description: document.getElementById('description').value.trim(),
+                    garment: document.getElementById('garment-input').value.trim(),
+                    garmentUnitCost: parseFloat(document.getElementById('garment-unit-cost').value) || 0,
+                    quantity: parseInt(document.getElementById('quantity').value) || 0,
+                    frontColors: parseInt(document.getElementById('front-colors').value) || 0,
+                    backColors: parseInt(document.getElementById('back-colors').value) || 0,
+                    margin: parseFloat(document.getElementById('margin').value) || 40,
+                    additionalLocations: [],
+                    additionalOptions: {
+                        oversized: false,
+                        colorChange: { enabled: false, quantity: 1 },
+                        polyNylon: false,
+                        metallicShimmer: false,
+                        glow: false,
+                        fleece: false,
+                        designLabor: { enabled: false, quantity: 0, unit: 'hours' }
+                    }
+                };
+
+                if (isEditMode && originalRowNumber) {
+                    formData.originalRowNumber = originalRowNumber;
+                }
+
+                // Collect additional locations
+                document.querySelectorAll('.additional-location-row').forEach(row => {
+                    const locationSelect = row.querySelector('.location-select');
+                    const colorsInput = row.querySelector('.location-qty');
+
+                    if (locationSelect && colorsInput && locationSelect.value) {
+                        formData.additionalLocations.push({
+                            location: locationSelect.value,
+                            colors: parseInt(colorsInput.value) || 0
+                        });
+                    }
+                });
+
+                // Collect additional options
+                formData.additionalOptions.oversized = document.getElementById('oversized-checkbox').checked;
+                formData.additionalOptions.polyNylon = document.getElementById('poly-nylon-checkbox').checked;
+                formData.additionalOptions.metallicShimmer = document.getElementById('metallic-shimmer-checkbox').checked;
+                formData.additionalOptions.glow = document.getElementById('glow-checkbox').checked;
+                formData.additionalOptions.fleece = document.getElementById('fleece-checkbox').checked;
+
+                // Color Change
+                const colorChangeCheckbox = document.getElementById('color-change-checkbox');
+                const colorChangeQuantity = document.getElementById('color-change-quantity');
+                if (colorChangeCheckbox && colorChangeQuantity) {
+                    formData.additionalOptions.colorChange.enabled = colorChangeCheckbox.checked;
+                    formData.additionalOptions.colorChange.quantity = parseInt(colorChangeQuantity.value) || 1;
+                }
+
+                // Design Labor
+                const designLaborCheckbox = document.getElementById('design-labor-checkbox');
+                const designLaborQuantityInput = document.getElementById('design-labor-quantity');
+                const designLaborUnitInput = document.getElementById('design-labor-unit');
+                if (designLaborCheckbox && designLaborQuantityInput && designLaborUnitInput) {
+                    formData.additionalOptions.designLabor.enabled = designLaborCheckbox.checked;
+                    formData.additionalOptions.designLabor.quantity = parseFloat(designLaborQuantityInput.value) || 0;
+                    formData.additionalOptions.designLabor.unit = designLaborUnitInput.value;
+                }
+
+                return formData;
+            }
+
+            /**
+             * Populates the form with previously saved data
+             */
+            function populateFormData(formData) {
+                if (!formData) return;
+
+                // Populate basic fields
+                if (formData.description) {
+                    document.getElementById('description').value = formData.description;
+                }
+                if (formData.garment) {
+                    document.getElementById('garment-input').value = formData.garment;
+                }
+                if (formData.garmentUnitCost) {
+                    document.getElementById('garment-unit-cost').value = formData.garmentUnitCost;
+                }
+                if (formData.quantity) {
+                    document.getElementById('quantity').value = formData.quantity;
+                }
+                if (formData.frontColors !== undefined) {
+                    document.getElementById('front-colors').value = formData.frontColors;
+                }
+                if (formData.backColors !== undefined) {
+                    document.getElementById('back-colors').value = formData.backColors;
+                }
+                if (formData.margin !== undefined) {
+                    document.getElementById('margin').value = formData.margin;
+                }
+
+                // Populate additional locations
+                if (formData.additionalLocations && formData.additionalLocations.length > 0) {
+                    additionalLocationsSection.classList.remove('hidden');
+                    formData.additionalLocations.forEach(location => {
+                        addAdditionalLocationRow();
+                        const lastRow = additionalLocationsContainer.lastElementChild;
+                        const locationSelect = lastRow.querySelector('.location-select');
+                        const colorsInput = lastRow.querySelector('.location-qty');
+
+                        if (locationSelect && colorsInput) {
+                            locationSelect.value = location.location;
+                            colorsInput.value = location.colors;
+                        }
+                    });
+                }
+
+                // Populate additional options
+                if (formData.additionalOptions) {
+                    const options = formData.additionalOptions;
+                    
+                    if (options.oversized) document.getElementById('oversized-checkbox').checked = true;
+                    if (options.polyNylon) document.getElementById('poly-nylon-checkbox').checked = true;
+                    if (options.metallicShimmer) document.getElementById('metallic-shimmer-checkbox').checked = true;
+                    if (options.glow) document.getElementById('glow-checkbox').checked = true;
+                    if (options.fleece) document.getElementById('fleece-checkbox').checked = true;
+
+                    // Color Change
+                    if (options.colorChange && options.colorChange.enabled) {
+                        document.getElementById('color-change-checkbox').checked = true;
+                        document.getElementById('color-change-dropdown').classList.remove('hidden');
+                        document.getElementById('color-change-quantity').value = options.colorChange.quantity;
+                    }
+
+                    // Design Labor
+                    if (options.designLabor && options.designLabor.enabled) {
+                        document.getElementById('design-labor-checkbox').checked = true;
+                        document.getElementById('design-labor-inputs').classList.remove('hidden');
+                        document.getElementById('design-labor-quantity').value = options.designLabor.quantity;
+                        document.getElementById('design-labor-unit').value = options.designLabor.unit;
+                    }
+                }
+
+                setTimeout(updateCalculations, 100);
+            }
+
+            /**
+             * Handles form submission to Google Apps Script
+             */
+            function handleSubmit() {
+                const description = document.getElementById('description').value.trim();
+                const quantity = document.getElementById('quantity').value;
+                const totalPriceText = document.getElementById('total-price').textContent;
+                
+                const totalPrice = parseFloat(totalPriceText.replace(/[^0-9.-]+/g, '')) || 0;
+                
+                if (!description) {
+                    alert('Please enter a description before adding to project.');
+                    return;
+                }
+                
+                if (!quantity || quantity <= 0) {
+                    alert('Please enter a valid quantity.');
+                    return;
+                }
+                
+                if (totalPrice <= 0) {
+                    alert('Please configure your estimate to calculate a total price.');
+                    return;
+                }
+                
+                const completeFormData = collectFormData();
+                
+                const apparelData = {
+                    description: description,
+                    quantity: parseInt(quantity),
+                    totalPrice: totalPrice,
+                    formData: completeFormData,
+                    originalRowNumber: isEditMode ? originalRowNumber : null
+                };
+                
+                if (isEditMode) {
+                    console.log('Edit mode - originalRowNumber:', originalRowNumber);
+                    console.log('apparelData:', apparelData);
+                }
+                
+                addToProjectBtn.disabled = true;
+                const originalButtonText = addToProjectBtn.textContent;
+                addToProjectBtn.textContent = isEditMode ? 'Updating...' : 'Adding...';
+                addToProjectBtn.classList.add('opacity-50');
+                
+                google.script.run
+                    .withSuccessHandler(function(result) {
+                        addToProjectBtn.disabled = false;
+                        addToProjectBtn.textContent = originalButtonText;
+                        addToProjectBtn.classList.remove('opacity-50');
+                        
+                        if (result.success) {
+                            if (result.isUpdate) {
+                                resetFormToNewMode();
+                            } else {
+                                resetForm();
+                            }
+                        } else {
+                            alert(`Error: ${result.message}`);
+                        }
+                    })
+                    .withFailureHandler(function(error) {
+                        addToProjectBtn.disabled = false;
+                        addToProjectBtn.textContent = originalButtonText;
+                        addToProjectBtn.classList.remove('opacity-50');
+                        
+                        console.error('Error adding to project:', error);
+                        alert('An error occurred while adding to the project. Please try again.');
+                    })
+                    .addApparelToProject(apparelData);
+            }
+
+            /**
+             * Resets the form to new mode
+             */
+            function resetFormToNewMode() {
+                resetForm();
+                isEditMode = false;
+                originalRowNumber = null;
+                addToProjectBtn.textContent = 'Add to Project';
+                document.querySelector('h1').textContent = 'Apparel / Screen Printing';
+            }
+
+            /**
+             * Resets the entire form
+             */
+            function resetForm() {
+                const elements = [
+                    'description', 'quantity', 'garment-input', 'garment-unit-cost', 
+                    'garment-total', 'front-colors', 'back-colors'
+                ];
+                
+                elements.forEach(id => {
+                    const element = document.getElementById(id);
+                    if (element) {
+                        element.value = id === 'front-colors' || id === 'back-colors' ? '0' : '';
+                    }
+                });
+                
+                document.getElementById('margin').value = '40';
+                
+                const checkboxes = [
+                    'oversized-checkbox', 'color-change-checkbox', 'poly-nylon-checkbox',
+                    'metallic-shimmer-checkbox', 'glow-checkbox', 'fleece-checkbox', 'design-labor-checkbox'
+                ];
+                
+                checkboxes.forEach(id => {
+                    const checkbox = document.getElementById(id);
+                    if (checkbox) checkbox.checked = false;
+                });
+                
+                document.getElementById('color-change-dropdown').classList.add('hidden');
+                document.getElementById('color-change-quantity').value = '1';
+                document.getElementById('design-labor-inputs').classList.add('hidden');
+                document.getElementById('design-labor-quantity').value = '';
+                document.getElementById('design-labor-unit').value = 'hours';
+                
+                additionalLocationsContainer.innerHTML = '';
+                additionalLocationsSection.classList.add('hidden');
+                additionalLocationCounter = 0;
+                
+                const summaryElements = ['total-cost', 'total-price', 'unit-price', 'net-income'];
+                summaryElements.forEach(id => {
+                    const element = document.getElementById(id);
+                    if (element) element.textContent = '$0.00';
+                });
+                
+                updateCalculations();
+            }
+
+            // === EVENT LISTENERS ===
+            
+            const quantityInput = document.getElementById('quantity');
+            const garmentUnitCostInput = document.getElementById('garment-unit-cost');
+            const frontColorsInput = document.getElementById('front-colors');
+            const backColorsInput = document.getElementById('back-colors');
+            const marginInput = document.getElementById('margin');
+            
+            if (quantityInput) quantityInput.addEventListener('input', updateCalculations);
+            if (garmentUnitCostInput) garmentUnitCostInput.addEventListener('input', updateCalculations);
+            if (frontColorsInput) frontColorsInput.addEventListener('input', updateCalculations);
+            if (backColorsInput) backColorsInput.addEventListener('input', updateCalculations);
+            if (marginInput) marginInput.addEventListener('input', updateCalculations);
+            
+            const designLaborCheckbox = document.getElementById('design-labor-checkbox');
+            const checkboxes = [
+                'oversized-checkbox', 'poly-nylon-checkbox', 'metallic-shimmer-checkbox',
+                'glow-checkbox', 'fleece-checkbox'
+            ];
+            
+            checkboxes.forEach(id => {
+                const checkbox = document.getElementById(id);
+                if (checkbox) checkbox.addEventListener('change', updateCalculations);
+            });
+            
+            const colorChangeCheckbox = document.getElementById('color-change-checkbox');
+            const colorChangeDropdown = document.getElementById('color-change-dropdown');
+            const colorChangeQuantity = document.getElementById('color-change-quantity');
+            
+            if (colorChangeCheckbox && colorChangeDropdown) {
+                colorChangeCheckbox.addEventListener('change', function() {
+                    if (this.checked) {
+                        colorChangeDropdown.classList.remove('hidden');
+                    } else {
+                        colorChangeDropdown.classList.add('hidden');
+                    }
+                    updateCalculations();
+                });
+            }
+            
+            if (colorChangeQuantity) {
+                colorChangeQuantity.addEventListener('change', updateCalculations);
+            }
+            
+            const designLaborInputs = document.getElementById('design-labor-inputs');
+            const designLaborQuantityInput = document.getElementById('design-labor-quantity');
+            const designLaborUnitInput = document.getElementById('design-labor-unit');
+            
+            if (designLaborCheckbox && designLaborInputs) {
+                designLaborCheckbox.addEventListener('change', function() {
+                    if (this.checked) {
+                        designLaborInputs.classList.remove('hidden');
+                    } else {
+                        designLaborInputs.classList.add('hidden');
+                    }
+                    updateCalculations();
+                });
+            }
+            
+            if (designLaborQuantityInput) designLaborQuantityInput.addEventListener('input', updateCalculations);
+            if (designLaborUnitInput) designLaborUnitInput.addEventListener('change', updateCalculations);
+            
+            if (drawerTrigger && drawer) {
+                drawerTrigger.addEventListener('click', function() {
+                    drawer.classList.remove('translate-x-full');
+                });
+            }
+            if (closeDrawerBtn && drawer) {
+                closeDrawerBtn.addEventListener('click', function() {
+                    drawer.classList.add('translate-x-full');
+                });
+            }
+            
+            if (addPrintLocationLink && additionalLocationsSection) {
+                addPrintLocationLink.addEventListener('click', () => {
+                    additionalLocationsSection.classList.remove('hidden');
+                    addAdditionalLocationRow();
+                });
+            }
+            
+            if (resetBtn) resetBtn.addEventListener('click', resetForm);
+            if (addToProjectBtn) addToProjectBtn.addEventListener('click', handleSubmit);
+
+            updateCalculations();
+        });
+    </script>
+</body>
+</html>
