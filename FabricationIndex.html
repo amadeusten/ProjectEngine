@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <base target="_top">
+    <!-- Load Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles for the drawer transition */
+        #advanced-drawer {
+            transition: transform 0.3s ease-in-out;
+        }
+        /* Style for active option buttons */
+        .option-btn.active {
+            background-color: #2563eb; /* Corresponds to Tailwind's blue-600 */
+            color: white;
+        }
+        /* Remove arrows from number inputs */
+        input[type=number]::-webkit-inner-spin-button,
+        input[type=number]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+        /* Style for remove buttons */
+        .remove-row-btn {
+            color: #ef4444;
+            cursor: pointer;
+            font-size: 14px;
+            line-height: 1;
+        }
+        .remove-row-btn:hover {
+            color: #dc2626;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
+
+    <div class="w-full max-w-2xl shadow-lg rounded-lg overflow-hidden bg-white">
+        <div class="flex">
+            <!-- Main Content -->
+            <div class="flex-grow p-6">
+                <h1 class="text-xl font-semibold text-gray-800 mb-6">Fabrication Details</h1>
+
+                <!-- Description and Dimensions Section -->
+                <div class="grid grid-cols-12 gap-x-2 mb-6 items-start">
+                    <div class="col-span-8">
+                        <label class="text-xs font-medium text-gray-600 block text-left">Description</label>
+                        <textarea id="description" class="mt-1 block w-full px-2 py-1 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-xs" rows="3"></textarea>
+                    </div>
+                    <div class="col-span-4">
+                        <label class="text-xs font-medium text-gray-600 block text-left">Dimensions</label>
+                        <input id="dimensions" type="text" class="mt-1 block w-full px-2 py-1 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-xs h-7" />
+                    </div>
+                </div>
+
+                <!-- Add Section Links -->
+                <div class="flex items-center gap-4 mb-6">
+                    <button id="add-material-link" class="text-blue-600 text-xs font-semibold flex items-center gap-1 hover:text-blue-800">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                        Add Material
+                    </button>
+                    <button id="add-personnel-link" class="text-blue-600 text-xs font-semibold flex items-center gap-1 hover:text-blue-800">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                        Add Personnel
+                    </button>
+                    <button id="add-component-link" class="text-blue-600 text-xs font-semibold flex items-center gap-1 hover:text-blue-800">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                        Add Components
+                    </button>
+                </div>
+
+                <!-- Materials Section (Hidden by default) -->
+                <div id="materials-section" class="mb-6 hidden">
+                    <div class="grid grid-cols-12 gap-x-2 items-start mb-2">
+                        <div class="col-span-5"><label class="text-xs font-medium text-gray-600 block text-left">Materials</label></div>
+                        <div class="col-span-2"><label class="text-xs font-medium text-gray-600 block text-left">Qty</label></div>
+                        <div class="col-span-2"><label class="text-xs font-medium text-gray-600 block text-left">Unit Cost</label></div>
+                        <div class="col-span-2"><label class="text-xs font-medium text-gray-600 block text-left">Total</label></div>
+                        <div class="col-span-1"></div> <!-- Empty space for remove button column -->
+                    </div>
+                    <div id="materials-container">
+                        <!-- Material rows will be added here dynamically -->
+                    </div>
+                </div>
+
+                <!-- Personnel Section (Hidden by default) -->
+                <div id="personnel-section" class="mb-6 hidden">
+                    <div class="grid grid-cols-12 gap-x-2 items-start mb-2">
+                        <div class="col-span-5"><label class="text-xs font-medium text-gray-600 block text-left">Personnel</label></div>
+                        <div class="col-span-1"><label class="text-xs font-medium text-gray-600 block text-left">Days</label></div>
+                        <div class="col-span-1"><label class="text-xs font-medium text-gray-600 block text-left">Hrs</label></div>
+                        <div class="col-span-2"><label class="text-xs font-medium text-gray-600 block text-left">Rate</label></div>
+                        <div class="col-span-2"><label class="text-xs font-medium text-gray-600 block text-left">Total</label></div>
+                        <div class="col-span-1"></div> <!-- Empty space for remove button column -->
+                    </div>
+                    <div id="personnel-container">
+                        <!-- Personnel rows will be added here dynamically -->
+                    </div>
+                </div>
+
+                <!-- Additional Components Section (Hidden by default) -->
+                <div id="components-section" class="mb-8 hidden">
+                    <div class="grid grid-cols-12 gap-x-2 items-start mb-2">
+                        <div class="col-span-5"><label class="text-xs font-medium text-gray-600 block text-left">Additional Components</label></div>
+                        <div class="col-span-2"><label class="text-xs font-medium text-gray-600 block text-left">Qty</label></div>
+                        <div class="col-span-2"><label class="text-xs font-medium text-gray-600 block text-left">Rate</label></div>
+                        <div class="col-span-2"><label class="text-xs font-medium text-gray-600 block text-left">Total</label></div>
+                        <div class="col-span-1"></div> <!-- Empty space for remove button column -->
+                    </div>
+                    <div id="components-container">
+                        <!-- Component rows will be added here dynamically -->
+                    </div>
+                </div>
+
+                <!-- Bottom/Results Section -->
+                <div class="flex flex-col justify-between rounded-md bg-gray-100 p-3 mt-auto">
+                   <div class="grid sm:grid-cols-[1fr_auto_1fr] items-center gap-x-4 gap-y-4 h-full">
+                        <div class="space-y-2">
+                            <div class="grid grid-cols-2 items-center"><div class="text-xs text-left">Total Cost</div><div id="total-cost" class="text-xs text-left font-semibold">$0.00</div></div>
+                            <div class="grid grid-cols-2 items-center">
+                                <div class="text-xs text-left">Margin</div>
+                                 <div class="relative w-20">
+                                    <input id="margin" type="number" value="40" min="0" step="1" class="w-full h-8 pr-6 pl-2 border border-gray-300 rounded-md text-sm" />
+                                    <span class="absolute inset-y-0 right-0 flex items-center pr-2 text-gray-500 text-sm">%</span>
+                                 </div>
+                            </div>
+                             <div class="grid grid-cols-2 items-center"><div class="text-xs text-left">Total Price</div><div id="total-price" class="text-xs text-left font-semibold">$0.00</div></div>
+                             <div class="grid grid-cols-2 items-center"><div class="text-xs text-left">Unit Price</div><div id="unit-price" class="text-xs text-left font-semibold">$0.00</div></div>
+                        </div>
+                        <div class="hidden sm:flex justify-center h-full"><div class="border-l border-gray-300"></div></div>
+                        <div class="flex flex-col justify-center items-center gap-2.5">
+                            <button id="add-to-project-btn" class="w-full bg-blue-600 text-white px-4 py-1 rounded-md text-sm hover:bg-blue-700">Add to Project</button>
+                            <button id="reset-btn" class="w-full bg-white border border-gray-300 px-4 py-1 rounded-md text-sm hover:bg-gray-50">Reset</button>
+                        </div>
+                   </div>
+                </div>
+
+            </div>
+            
+            <!-- Drawer Trigger -->
+            <div id="drawer-trigger" class="flex-shrink-0 bg-gray-50 hover:bg-gray-200 transition-colors cursor-pointer flex items-center justify-center w-10" style="box-shadow: -4px 0 12px -4px rgba(0,0,0,0.05)">
+                <div class="flex flex-col items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-500"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                    <span class="text-xs font-medium text-gray-500" style="writing-mode: vertical-rl; text-orientation: mixed; transform: rotate(180deg);">Advanced Settings</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Advanced Settings Drawer -->
+    <div id="advanced-drawer" class="fixed top-0 right-0 h-full w-80 bg-white shadow-xl p-4 transform translate-x-full">
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-base font-semibold">Advanced Settings</h2>
+            <button id="close-drawer-btn" class="text-gray-500 hover:text-gray-800 text-2xl">&times;</button>
+        </div>
+        <!-- Advanced settings content can be added here -->
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // === GLOBAL VARIABLES ===
+            let allMaterialsData = [];
+            let allPersonnelData = [];
+            let materialRowCounter = 0;
+            let personnelRowCounter = 0;
+            let componentRowCounter = 0;
+            let isDataLoaded = false;
+            let isDataLoading = true;
+            let isEditMode = false;
+            let originalRowNumber = null;
+
+            // === DOM ELEMENTS ===
+            const drawer = document.getElementById('advanced-drawer');
+            const drawerTrigger = document.getElementById('drawer-trigger');
+            const closeDrawerBtn = document.getElementById('close-drawer-btn');
+            const resetBtn = document.getElementById('reset-btn');
+            const addToProjectBtn = document.getElementById('add-to-project-btn');
+
+            const addMaterialLink = document.getElementById('add-material-link');
+            const addPersonnelLink = document.getElementById('add-personnel-link');
+            const addComponentLink = document.getElementById('add-component-link');
+
+            // === DATA LOADING FUNCTIONS ===
+
+            /**
+             * Checks if all required data has been loaded
+             */
+            function checkDataLoadStatus() {
+                if (allMaterialsData.length > 0 && allPersonnelData.length > 0) {
+                    isDataLoaded = true;
+                    isDataLoading = false;
+                    enableAddButtons();
+                    console.log("All data loaded successfully");
+                    
+                    // If we're in edit mode, populate the form now that data is ready
+                    if (window.editFormData) {
+                        populateFormData(window.editFormData);
+                    }
+                }
+            }
+
+            /**
+             * Enables the add buttons once data is loaded
+             */
+            function enableAddButtons() {
+                addMaterialLink.classList.remove('opacity-50', 'cursor-not-allowed');
+                addPersonnelLink.classList.remove('opacity-50', 'cursor-not-allowed');
+                addComponentLink.classList.remove('opacity-50', 'cursor-not-allowed');
+                
+                addMaterialLink.querySelector('span')?.remove(); // Remove loading text if exists
+                addPersonnelLink.querySelector('span')?.remove();
+            }
+
+            /**
+             * Disables add buttons while data is loading
+             */
+            function disableAddButtons() {
+                addMaterialLink.classList.add('opacity-50', 'cursor-not-allowed');
+                addPersonnelLink.classList.add('opacity-50', 'cursor-not-allowed');
+                
+                // Add loading indicators
+                if (!addMaterialLink.querySelector('span')) {
+                    const loadingSpan = document.createElement('span');
+                    loadingSpan.textContent = ' (Loading...)';
+                    loadingSpan.className = 'text-gray-400';
+                    addMaterialLink.appendChild(loadingSpan);
+                }
+                
+                if (!addPersonnelLink.querySelector('span')) {
+                    const loadingSpan = document.createElement('span');
+                    loadingSpan.textContent = ' (Loading...)';
+                    loadingSpan.className = 'text-gray-400';
+                    addPersonnelLink.appendChild(loadingSpan);
+                }
+            }
+
+            const materialsSection = document.getElementById('materials-section');
+            const personnelSection = document.getElementById('personnel-section');
+            const componentsSection = document.getElementById('components-section');
+            
+            const materialsContainer = document.getElementById('materials-container');
+            const personnelContainer = document.getElementById('personnel-container');
+            const componentsContainer = document.getElementById('components-container');
+
+            // === FABRICATION CALCULATOR FUNCTIONS ===
+
+            /**
+             * Populates the material dropdown and stores the full data set.
+             * @param {Array<Object>} materials - Array of objects with 'name' and 'unitCost'.
+             */
+            function populateMaterialDropdown(materials) {
+                if (!materials || materials.length === 0) {
+                    console.log("No materials found or returned from server.");
+                    // Still mark as loaded to prevent indefinite loading state
+                    allMaterialsData = [];
+                    checkDataLoadStatus();
+                    return;
+                }
+                allMaterialsData = materials;
+                console.log("Fabrication materials loaded:", materials.length);
+                checkDataLoadStatus();
+            }
+
+            /**
+             * Populates personnel data and stores the full data set.
+             * @param {Array<Object>} personnel - Array of objects with 'name' and 'projectRate'.
+             */
+            function populatePersonnelData(personnel) {
+                if (!personnel || personnel.length === 0) {
+                    console.log("No personnel found or returned from server.");
+                    // Still mark as loaded to prevent indefinite loading state
+                    allPersonnelData = [];
+                    checkDataLoadStatus();
+                    return;
+                }
+                allPersonnelData = personnel;
+                console.log("Personnel data loaded:", personnel.length);
+                checkDataLoadStatus();
+            }
+
+            /**
+             * Creates a material dropdown with all available materials
+             * @returns {string} HTML string for material dropdown
+             */
+            function createMaterialDropdown() {
+                let options = '<option value="">Select Material...</option>';
+                allMaterialsData.forEach(material => {
+                    options += `<option value="${material.name}" data-cost="${material.unitCost}">${material.name}</option>`;
+                });
+                return options;
+            }
+
+            /**
+             * Creates a personnel dropdown with all available personnel
+             * @returns {string} HTML string for personnel dropdown
+             */
+            function createPersonnelDropdown() {
+                let options = '<option value="">Select Personnel...</option>';
+                allPersonnelData.forEach(person => {
+                    options += `<option value="${person.name}" data-rate="${person.projectRate}">${person.name}</option>`;
+                });
+                return options;
+            }
+
+            /**
+             * Adds a new material row to the materials section
+             */
+            function addMaterialRow() {
+                // Check if data is loaded
+                if (!isDataLoaded) {
+                    alert('Please wait for material data to finish loading before adding materials.');
+                    return;
+                }
+
+                materialRowCounter++;
+                const rowId = `material-row-${materialRowCounter}`;
+                
+                const materialRow = document.createElement('div');
+                materialRow.className = 'grid grid-cols-12 gap-x-2 mt-1 material-row';
+                materialRow.id = rowId;
+                materialRow.innerHTML = `
+                    <select class="material-dropdown col-span-5 mt-1 block w-full px-2 py-1 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-xs h-7">
+                        ${createMaterialDropdown()}
+                    </select>
+                    <input type="number" class="material-qty col-span-2 mt-1 block w-full px-2 py-1 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-xs h-7" placeholder="0" step="0.01" />
+                    <input type="number" class="material-unit-cost col-span-2 mt-1 block w-full px-2 py-1 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-xs h-7" placeholder="0.00" step="0.01" />
+                    <input type="number" class="material-total col-span-2 mt-1 block w-full px-2 py-1 bg-gray-100 border border-gray-300 rounded-md shadow-sm text-xs h-7" disabled />
+                    <button class="remove-row-btn col-span-1 mt-1 flex items-center justify-center" onclick="removeMaterialRow('${rowId}')" title="Remove row">
+                        ×
+                    </button>
+                `;
+
+                materialsContainer.appendChild(materialRow);
+
+                // Add event listeners for this row
+                const dropdown = materialRow.querySelector('.material-dropdown');
+                const qtyInput = materialRow.querySelector('.material-qty');
+                const unitCostInput = materialRow.querySelector('.material-unit-cost');
+                const totalInput = materialRow.querySelector('.material-total');
+
+                // Auto-populate unit cost when material is selected
+                dropdown.addEventListener('change', function() {
+                    const selectedOption = this.options[this.selectedIndex];
+                    if (selectedOption.dataset.cost) {
+                        unitCostInput.value = parseFloat(selectedOption.dataset.cost).toFixed(2);
+                        calculateMaterialRowTotal();
+                    } else {
+                        unitCostInput.value = '';
+                        totalInput.value = '';
+                    }
+                    updateTotalCosts();
+                });
+
+                // Calculate row total when qty or unit cost changes
+                function calculateMaterialRowTotal() {
+                    const qty = parseFloat(qtyInput.value) || 0;
+                    const unitCost = parseFloat(unitCostInput.value) || 0;
+                    const total = qty * unitCost;
+                    totalInput.value = total.toFixed(2);
+                }
+
+                qtyInput.addEventListener('input', function() {
+                    calculateMaterialRowTotal();
+                    updateTotalCosts();
+                });
+
+                unitCostInput.addEventListener('input', function() {
+                    calculateMaterialRowTotal();
+                    updateTotalCosts();
+                });
+            }
+
+            /**
+             * Removes a material row
+             * @param {string} rowId - The ID of the row to remove
+             */
+            function removeMaterialRow(rowId) {
+                const row = document.getElementById(rowId);
+                if (row) {
+                    row.remove();
+                    updateTotalCosts();
+                    
+                    // Hide section if no rows remain
+                    if (materialsContainer.children.length === 0) {
+                        materialsSection.classList.add('hidden');
+                    }
+                }
+            }
+            
+            // Make removeMaterialRow globally accessible
+            window.removeMaterialRow = removeMaterialRow;
+
+            /**
+             * Adds a new personnel row to the personnel section
+             */
+            function addPersonnelRow() {
+                // Check if data is loaded
+                if (!isDataLoaded) {
+                    alert('Please wait for personnel data to finish loading before adding personnel.');
+                    return;
+                }
+
+                personnelRowCounter++;
+                const rowId = `personnel-row-${personnelRowCounter}`;
+                
+                const personnelRow = document.createElement('div');
+                personnelRow.className = 'grid grid-cols-12 gap-x-2 mt-1 personnel-row';
+                personnelRow.id = rowId;
+                personnelRow.innerHTML = `
+                    <select class="personnel-dropdown col-span-5 mt-1 block w-full px-2 py-1 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-xs h-7">
+                        ${createPersonnelDropdown()}
+                    </select>
+                    <input type="number" class="personnel-days col-span-1 mt-1 block w-full px-2 py-1 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-xs h-7" placeholder="0" step="0.1" />
+                    <input type="number" class="personnel-hours col-span-1 mt-1 block w-full px-2 py-1 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-xs h-7" placeholder="0" step="0.1" />
+                    <input type="number" class="personnel-rate col-span-2 mt-1 block w-full px-2 py-1 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-xs h-7" placeholder="0.00" step="0.01" />
+                    <input type="number" class="personnel-total col-span-2 mt-1 block w-full px-2 py-1 bg-gray-100 border border-gray-300 rounded-md shadow-sm text-xs h-7" disabled />
+                    <button class="remove-row-btn col-span-1 mt-1 flex items-center justify-center" onclick="removePersonnelRow('${rowId}')" title="Remove row">
+                        ×
+                    </button>
+                `;
+
+                personnelContainer.appendChild(personnelRow);
+
+                // Add event listeners for this row
+                const dropdown = personnelRow.querySelector('.personnel-dropdown');
+                const daysInput = personnelRow.querySelector('.personnel-days');
+                const hoursInput = personnelRow.querySelector('.personnel-hours');
+                const rateInput = personnelRow.querySelector('.personnel-rate');
+                const totalInput = personnelRow.querySelector('.personnel-total');
+
+                // Auto-populate rate when personnel is selected
+                dropdown.addEventListener('change', function() {
+                    const selectedOption = this.options[this.selectedIndex];
+                    if (selectedOption.dataset.rate) {
+                        rateInput.value = parseFloat(selectedOption.dataset.rate).toFixed(2);
+                        calculatePersonnelRowTotal();
+                    } else {
+                        rateInput.value = '';
+                        totalInput.value = '';
+                    }
+                    updateTotalCosts();
+                });
+
+                // Calculate row total when any input changes
+                function calculatePersonnelRowTotal() {
+                    const days = parseFloat(daysInput.value) || 0;
+                    const hours = parseFloat(hoursInput.value) || 0;
+                    const rate = parseFloat(rateInput.value) || 0;
+                    const total = days * hours * rate;
+                    totalInput.value = total.toFixed(2);
+                }
+
+                [daysInput, hoursInput, rateInput].forEach(input => {
+                    input.addEventListener('input', function() {
+                        calculatePersonnelRowTotal();
+                        updateTotalCosts();
+                    });
+                });
+            }
+
+            /**
+             * Removes a personnel row
+             * @param {string} rowId - The ID of the row to remove
+             */
+            function removePersonnelRow(rowId) {
+                const row = document.getElementById(rowId);
+                if (row) {
+                    row.remove();
+                    updateTotalCosts();
+                    
+                    // Hide section if no rows remain
+                    if (personnelContainer.children.length === 0) {
+                        personnelSection.classList.add('hidden');
+                    }
+                }
+            }
+            
+            // Make removePersonnelRow globally accessible
+            window.removePersonnelRow = removePersonnelRow;
+
+            /**
+             * Adds a new component row to the components section
+             */
+            function addComponentRow() {
+                componentRowCounter++;
+                const rowId = `component-row-${componentRowCounter}`;
+                
+                const componentRow = document.createElement('div');
+                componentRow.className = 'grid grid-cols-12 gap-x-2 mt-1 component-row';
+                componentRow.id = rowId;
+                componentRow.innerHTML = `
+                    <input type="text" class="component-description col-span-5 mt-1 block w-full px-2 py-1 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-xs h-7" placeholder="Component description..." />
+                    <input type="number" class="component-qty col-span-2 mt-1 block w-full px-2 py-1 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-xs h-7" placeholder="0" step="0.01" />
+                    <input type="number" class="component-rate col-span-2 mt-1 block w-full px-2 py-1 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-xs h-7" placeholder="0.00" step="0.01" />
+                    <input type="number" class="component-total col-span-2 mt-1 block w-full px-2 py-1 bg-gray-100 border border-gray-300 rounded-md shadow-sm text-xs h-7" disabled />
+                    <button class="remove-row-btn col-span-1 mt-1 flex items-center justify-center" onclick="removeComponentRow('${rowId}')" title="Remove row">
+                        ×
+                    </button>
+                `;
+
+                componentsContainer.appendChild(componentRow);
+
+                // Add event listeners for this row
+                const qtyInput = componentRow.querySelector('.component-qty');
+                const rateInput = componentRow.querySelector('.component-rate');
+                const totalInput = componentRow.querySelector('.component-total');
+
+                // Calculate row total when qty or rate changes
+                function calculateComponentRowTotal() {
+                    const qty = parseFloat(qtyInput.value) || 0;
+                    const rate = parseFloat(rateInput.value) || 0;
+                    const total = qty * rate;
+                    totalInput.value = total.toFixed(2);
+                }
+
+                qtyInput.addEventListener('input', function() {
+                    calculateComponentRowTotal();
+                    updateTotalCosts();
+                });
+
+                rateInput.addEventListener('input', function() {
+                    calculateComponentRowTotal();
+                    updateTotalCosts();
+                });
+            }
+
+            /**
+             * Removes a component row
+             * @param {string} rowId - The ID of the row to remove
+             */
+            function removeComponentRow(rowId) {
+                const row = document.getElementById(rowId);
+                if (row) {
+                    row.remove();
+                    updateTotalCosts();
+                    
+                    // Hide section if no rows remain
+                    if (componentsContainer.children.length === 0) {
+                        componentsSection.classList.add('hidden');
+                    }
+                }
+            }
+            
+            // Make removeComponentRow globally accessible
+            window.removeComponentRow = removeComponentRow;
+
+            /**
+             * Updates the total costs in the summary section
+             */
+            function updateTotalCosts() {
+                let totalCost = 0;
+
+                // Sum materials
+                document.querySelectorAll('.material-total').forEach(input => {
+                    totalCost += parseFloat(input.value) || 0;
+                });
+
+                // Sum personnel
+                document.querySelectorAll('.personnel-total').forEach(input => {
+                    totalCost += parseFloat(input.value) || 0;
+                });
+
+                // Sum components
+                document.querySelectorAll('.component-total').forEach(input => {
+                    totalCost += parseFloat(input.value) || 0;
+                });
+
+                // Update display
+                const totalCostElement = document.getElementById('total-cost');
+                const totalPriceElement = document.getElementById('total-price');
+                const unitPriceElement = document.getElementById('unit-price');
+                const marginInput = document.getElementById('margin');
+
+                totalCostElement.textContent = `$${totalCost.toFixed(2)}`;
+
+                // Calculate total price with margin: Total Price = Total Cost / (1 - Margin%)
+                const margin = parseFloat(marginInput.value) || 0;
+                const marginDecimal = margin / 100;
+                
+                // Prevent division by zero or negative margins >= 100%
+                let totalPrice = 0;
+                if (marginDecimal < 1 && marginDecimal >= 0) {
+                    totalPrice = totalCost / (1 - marginDecimal);
+                } else if (marginDecimal < 0) {
+                    // Handle negative margins (discount)
+                    totalPrice = totalCost / (1 - marginDecimal);
+                } else {
+                    // Margin >= 100% would result in division by zero or negative denominator
+                    totalPrice = totalCost; // Fallback to cost
+                }
+                
+                totalPriceElement.textContent = `${totalPrice.toFixed(2)}`;
+
+                // For now, unit price equals total price (assuming quantity of 1)
+                unitPriceElement.textContent = `$${totalPrice.toFixed(2)}`;
+            }
+
+            /**
+             * Collects all form data for logging purposes
+             * @returns {Object} Complete form data
+             */
+            function collectFormData() {
+                const formData = {
+                    description: document.getElementById('description').value.trim(),
+                    dimensions: document.getElementById('dimensions').value.trim(),
+                    margin: parseFloat(document.getElementById('margin').value) || 40,
+                    materials: [],
+                    personnel: [],
+                    components: []
+                };
+
+                // Include original row number if we're in edit mode
+                if (isEditMode && originalRowNumber) {
+                    formData.originalRowNumber = originalRowNumber;
+                }
+
+                // Collect materials data
+                document.querySelectorAll('.material-row').forEach(row => {
+                    const materialDropdown = row.querySelector('.material-dropdown');
+                    const qtyInput = row.querySelector('.material-qty');
+                    const unitCostInput = row.querySelector('.material-unit-cost');
+                    const totalInput = row.querySelector('.material-total');
+
+                    if (materialDropdown.value) {
+                        formData.materials.push({
+                            name: materialDropdown.value,
+                            quantity: parseFloat(qtyInput.value) || 0,
+                            unitCost: parseFloat(unitCostInput.value) || 0,
+                            total: parseFloat(totalInput.value) || 0
+                        });
+                    }
+                });
+
+                // Collect personnel data
+                document.querySelectorAll('.personnel-row').forEach(row => {
+                    const personnelDropdown = row.querySelector('.personnel-dropdown');
+                    const daysInput = row.querySelector('.personnel-days');
+                    const hoursInput = row.querySelector('.personnel-hours');
+                    const rateInput = row.querySelector('.personnel-rate');
+                    const totalInput = row.querySelector('.personnel-total');
+
+                    if (personnelDropdown.value) {
+                        formData.personnel.push({
+                            name: personnelDropdown.value,
+                            days: parseFloat(daysInput.value) || 0,
+                            hours: parseFloat(hoursInput.value) || 0,
+                            rate: parseFloat(rateInput.value) || 0,
+                            total: parseFloat(totalInput.value) || 0
+                        });
+                    }
+                });
+
+                // Collect components data
+                document.querySelectorAll('.component-row').forEach(row => {
+                    const descInput = row.querySelector('.component-description');
+                    const qtyInput = row.querySelector('.component-qty');
+                    const rateInput = row.querySelector('.component-rate');
+                    const totalInput = row.querySelector('.component-total');
+
+                    if (descInput.value.trim()) {
+                        formData.components.push({
+                            description: descInput.value.trim(),
+                            quantity: parseFloat(qtyInput.value) || 0,
+                            rate: parseFloat(rateInput.value) || 0,
+                            total: parseFloat(totalInput.value) || 0
+                        });
+                    }
+                });
+
+                return formData;
+            }
+
+            /**
+             * Populates the form with previously saved data
+             * @param {Object} formData - The form data to restore
+             */
+            function populateFormData(formData) {
+                if (!formData) return;
+
+                // Set edit mode if this data has an original row number
+                if (formData.originalRowNumber) {
+                    isEditMode = true;
+                    originalRowNumber = formData.originalRowNumber;
+                    
+                    // Update the button text and title to reflect edit mode
+                    addToProjectBtn.textContent = 'Update Project';
+                    document.querySelector('h1').textContent = 'Edit Fabrication Details';
+                }
+
+                // Populate basic fields
+                if (formData.description) {
+                    document.getElementById('description').value = formData.description;
+                }
+                if (formData.dimensions) {
+                    document.getElementById('dimensions').value = formData.dimensions;
+                }
+                if (formData.margin !== undefined) {
+                    document.getElementById('margin').value = formData.margin;
+                }
+
+                // Populate materials
+                if (formData.materials && formData.materials.length > 0) {
+                    materialsSection.classList.remove('hidden');
+                    formData.materials.forEach(material => {
+                        addMaterialRow();
+                        const lastRow = materialsContainer.lastElementChild;
+                        const dropdown = lastRow.querySelector('.material-dropdown');
+                        const qtyInput = lastRow.querySelector('.material-qty');
+                        const unitCostInput = lastRow.querySelector('.material-unit-cost');
+
+                        dropdown.value = material.name;
+                        qtyInput.value = material.quantity;
+                        unitCostInput.value = material.unitCost;
+                        
+                        // Trigger calculation
+                        qtyInput.dispatchEvent(new Event('input'));
+                    });
+                }
+
+                // Populate personnel
+                if (formData.personnel && formData.personnel.length > 0) {
+                    personnelSection.classList.remove('hidden');
+                    formData.personnel.forEach(person => {
+                        addPersonnelRow();
+                        const lastRow = personnelContainer.lastElementChild;
+                        const dropdown = lastRow.querySelector('.personnel-dropdown');
+                        const daysInput = lastRow.querySelector('.personnel-days');
+                        const hoursInput = lastRow.querySelector('.personnel-hours');
+                        const rateInput = lastRow.querySelector('.personnel-rate');
+
+                        dropdown.value = person.name;
+                        daysInput.value = person.days;
+                        hoursInput.value = person.hours;
+                        rateInput.value = person.rate;
+                        
+                        // Trigger calculation
+                        daysInput.dispatchEvent(new Event('input'));
+                    });
+                }
+
+                // Populate components
+                if (formData.components && formData.components.length > 0) {
+                    componentsSection.classList.remove('hidden');
+                    formData.components.forEach(component => {
+                        addComponentRow();
+                        const lastRow = componentsContainer.lastElementChild;
+                        const descInput = lastRow.querySelector('.component-description');
+                        const qtyInput = lastRow.querySelector('.component-qty');
+                        const rateInput = lastRow.querySelector('.component-rate');
+
+                        descInput.value = component.description;
+                        qtyInput.value = component.quantity;
+                        rateInput.value = component.rate;
+                        
+                        // Trigger calculation
+                        qtyInput.dispatchEvent(new Event('input'));
+                    });
+                }
+
+                // Update totals after all data is loaded
+                setTimeout(updateTotalCosts, 100);
+            }
+            /**
+             * Adds the current fabrication data to the project spreadsheet
+             */
+            function addToProject() {
+                // Get form values
+                const description = document.getElementById('description').value.trim();
+                const dimensions = document.getElementById('dimensions').value.trim();
+                const totalPriceText = document.getElementById('total-price').textContent;
+                
+                // Extract numeric value from total price (remove $ and commas)
+                const totalPrice = parseFloat(totalPriceText.replace(/[^0-9.-]+/g, '')) || 0;
+                
+                // Validate required fields
+                if (!description) {
+                    alert('Please enter a description before adding to project.');
+                    return;
+                }
+                
+                if (totalPrice <= 0) {
+                    alert('Please add materials, personnel, or components to calculate a total price.');
+                    return;
+                }
+                
+                // Collect complete form data for logging
+                const completeFormData = collectFormData();
+                
+                // Prepare data object - pass originalRowNumber at the top level too for backup
+                const fabricationData = {
+                    description: description,
+                    dimensions: dimensions,
+                    totalPrice: totalPrice,
+                    formData: completeFormData,
+                    originalRowNumber: isEditMode ? originalRowNumber : null
+                };
+                
+                // Debug log to help troubleshoot
+                if (isEditMode) {
+                    console.log('Edit mode - originalRowNumber:', originalRowNumber);
+                    console.log('fabricationData:', fabricationData);
+                }
+                
+                // Disable button and show loading state
+                addToProjectBtn.disabled = true;
+                const originalButtonText = addToProjectBtn.textContent;
+                addToProjectBtn.textContent = isEditMode ? 'Updating...' : 'Adding...';
+                addToProjectBtn.classList.add('opacity-50');
+                
+                // Call server-side function
+                google.script.run
+                    .withSuccessHandler(function(result) {
+                        // Re-enable button
+                        addToProjectBtn.disabled = false;
+                        addToProjectBtn.textContent = originalButtonText;
+                        addToProjectBtn.classList.remove('opacity-50');
+                        
+                        if (result.success) {
+                            if (result.isUpdate) {
+                                // For updates, just reset the form and return to normal mode
+                                resetFormToNewMode();
+                            } else {
+                                // For new items, simply reset the form
+                                resetForm();
+                            }
+                        } else {
+                            alert(`Error: ${result.message}`);
+                        }
+                    })
+                    .withFailureHandler(function(error) {
+                        // Re-enable button
+                        addToProjectBtn.disabled = false;
+                        addToProjectBtn.textContent = originalButtonText;
+                        addToProjectBtn.classList.remove('opacity-50');
+                        
+                        console.error('Error adding to project:', error);
+                        alert('An error occurred while adding to the project. Please try again.');
+                    })
+                    .addFabricationToProject(fabricationData);
+            }
+            function resetForm() {
+                // Clear all input fields
+                document.getElementById('description').value = '';
+                document.getElementById('dimensions').value = '';
+                
+                // Remove all dynamic rows
+                materialsContainer.innerHTML = '';
+                personnelContainer.innerHTML = '';
+                componentsContainer.innerHTML = '';
+                
+                // Hide all sections
+                materialsSection.classList.add('hidden');
+                personnelSection.classList.add('hidden');
+                componentsSection.classList.add('hidden');
+                
+                // Reset counters
+                materialRowCounter = 0;
+                personnelRowCounter = 0;
+                componentRowCounter = 0;
+                
+                // Reset margin to default
+                document.getElementById('margin').value = '40';
+                
+                // Update totals
+                updateTotalCosts();
+            }
+
+            // === EVENT LISTENERS ===
+            
+            // Drawer functionality
+            drawerTrigger.addEventListener('click', () => drawer.classList.remove('translate-x-full'));
+            closeDrawerBtn.addEventListener('click', () => drawer.classList.add('translate-x-full'));
+            
+            // Add section links
+            addMaterialLink.addEventListener('click', () => {
+                if (!isDataLoaded) {
+                    alert('Please wait for data to finish loading.');
+                    return;
+                }
+                materialsSection.classList.remove('hidden');
+                addMaterialRow();
+            });
+            
+            addPersonnelLink.addEventListener('click', () => {
+                if (!isDataLoaded) {
+                    alert('Please wait for data to finish loading.');
+                    return;
+                }
+                personnelSection.classList.remove('hidden');
+                addPersonnelRow();
+            });
+            
+            addComponentLink.addEventListener('click', () => {
+                componentsSection.classList.remove('hidden');
+                addComponentRow();
+            });
+            
+            // Reset button
+            resetBtn.addEventListener('click', resetForm);
+            
+            // Add to Project button
+            addToProjectBtn.addEventListener('click', addToProject);
+            
+            // Margin change listener
+            document.getElementById('margin').addEventListener('input', updateTotalCosts);
+
+            // === INITIALIZATION ===
+            // Disable add buttons initially
+            disableAddButtons();
+            
+            // Load data from Google Apps Script
+            google.script.run.withSuccessHandler(populateMaterialDropdown).getMaterials();
+            google.script.run.withSuccessHandler(populatePersonnelData).getPersonnel();
+            
+            // Note: Edit form population now happens in checkDataLoadStatus() once data is ready
+        });
+    </script>
+</body>
+</html>
