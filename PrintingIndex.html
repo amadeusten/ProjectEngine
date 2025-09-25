@@ -33,16 +33,6 @@
         .remove-row-btn:hover {
             color: #dc2626;
         }
-        
-        .hidden { display: none; }
-        
-        #error-message {
-            color: #dc2626;
-            font-weight: bold;
-            margin-top: 8px;
-            margin-bottom: 8px;
-            min-height: 16px;
-        }
     </style>
 </head>
 <body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
@@ -51,55 +41,57 @@
         <div class="flex">
             <!-- Main Content -->
             <div class="flex-grow p-6">
-                <h1 class="text-lg font-semibold text-gray-800 mb-4">PrintCut Estimate</h1>
+                <h1 class="text-xl font-semibold text-gray-800 mb-6">Printing Cost Calculator</h1>
 
-                <!-- Description Section -->
-                <div class="mb-4">
-                    <label class="text-xs font-medium text-gray-700 block text-left mb-1">Description</label>
-                    <input id="description" type="text" class="block w-full px-2 py-1 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-xs" placeholder="Enter description..." />
+                <!-- Description and Quantity Section -->
+                <div class="grid grid-cols-12 gap-x-2 mb-6 items-start">
+                    <div class="col-span-8">
+                        <label class="text-xs font-medium text-gray-600 block text-left">Description</label>
+                        <textarea id="description" class="mt-1 block w-full px-2 py-1 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-xs" rows="3"></textarea>
+                    </div>
+                    <div class="col-span-4">
+                        <label class="text-xs font-medium text-gray-600 block text-left">Quantity</label>
+                        <input id="quantity" type="number" min="1" value="1" class="mt-1 block w-full px-2 py-1 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-xs h-7" />
+                    </div>
                 </div>
 
                 <!-- Material Selection -->
-                <div class="mb-4">
-                    <label class="text-xs font-medium text-gray-700 block text-left mb-1">Material</label>
-                    <select id="material" class="block w-full px-2 py-1 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-xs">
-                        <option disabled selected>Loading materials...</option>
+                <div class="mb-6">
+                    <label class="text-xs font-medium text-gray-600 block text-left">Material</label>
+                    <select id="material" class="mt-1 block w-full px-2 py-1 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-xs">
+                        <option value="">Select Material</option>
                     </select>
-                    <div id="error-message" class="text-xs"></div>
-                    <div id="loading-message" class="text-xs text-gray-500 mt-1">Loading materials...</div>
+                    <div id="error-message" class="text-xs text-red-600 mt-1 hidden"></div>
                 </div>
 
-                <!-- Quantity and Dimensions Section -->
-                <div class="grid grid-cols-12 gap-x-4 mb-4 items-start">
-                    <div class="col-span-4">
-                        <label class="text-xs font-medium text-gray-700 block text-left mb-1">Quantity</label>
-                        <input id="qty" type="number" class="block w-full px-2 py-1 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-xs" placeholder="1" min="1" step="1" />
+                <!-- Dimensions Section -->
+                <div class="grid grid-cols-2 gap-x-4 mb-6">
+                    <div>
+                        <label class="text-xs font-medium text-gray-600 block text-left">Width (inches)</label>
+                        <input id="width" type="number" step="0.1" class="mt-1 block w-full px-2 py-1 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-xs h-7" placeholder="0.0" />
                     </div>
-                    <div class="col-span-4">
-                        <label class="text-xs font-medium text-gray-700 block text-left mb-1">Artwork Width (in)</label>
-                        <input id="width" type="number" class="block w-full px-2 py-1 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-xs" placeholder="0" step="0.01" />
-                    </div>
-                    <div class="col-span-4">
-                        <label class="text-xs font-medium text-gray-700 block text-left mb-1">Artwork Height (in)</label>
-                        <input id="height" type="number" class="block w-full px-2 py-1 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-xs" placeholder="0" step="0.01" />
+                    <div>
+                        <label class="text-xs font-medium text-gray-600 block text-left">Height (inches)</label>
+                        <input id="height" type="number" step="0.1" class="mt-1 block w-full px-2 py-1 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-xs h-7" placeholder="0.0" />
                     </div>
                 </div>
 
                 <!-- Options Section -->
-                <div class="mb-4">
+                <div class="mb-6">
+                    <label class="text-xs font-medium text-gray-600 block text-left mb-2">Options</label>
                     <div class="space-y-2">
-                        <div class="flex items-center">
-                            <input type="checkbox" id="complex-shape" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
-                            <label for="complex-shape" class="ml-2 block text-xs text-gray-700">Complex Shape</label>
-                        </div>
-                        <div class="flex items-center">
-                            <input type="checkbox" id="double-sided" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
-                            <label for="double-sided" class="ml-2 block text-xs text-gray-700">Double Sided</label>
-                        </div>
-                        <div class="flex items-center">
-                            <input type="checkbox" id="lamination" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
-                            <label for="lamination" class="ml-2 block text-xs text-gray-700">Lamination</label>
-                        </div>
+                        <label class="flex items-center">
+                            <input type="checkbox" id="complexShape" class="mr-2">
+                            <span class="text-xs">Complex Shape</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="checkbox" id="doubleSided" class="mr-2">
+                            <span class="text-xs">Double Sided</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="checkbox" id="lamination" class="mr-2">
+                            <span class="text-xs">Lamination</span>
+                        </label>
                     </div>
                 </div>
 
@@ -111,7 +103,7 @@
                             <div class="grid grid-cols-2 items-center">
                                 <div class="text-xs text-left">Margin</div>
                                  <div class="relative w-20">
-                                    <input id="margin" type="number" value="50" min="0" step="1" class="w-full h-8 pr-6 pl-2 border border-gray-300 rounded-md text-sm" />
+                                    <input id="margin" type="number" value="60" min="0" step="1" class="w-full h-8 pr-6 pl-2 border border-gray-300 rounded-md text-sm" />
                                     <span class="absolute inset-y-0 right-0 flex items-center pr-2 text-gray-500 text-sm">%</span>
                                  </div>
                             </div>
@@ -138,8 +130,8 @@
         </div>
     </div>
 
-    <!-- Additional Options Drawer -->
-    <div id="advanced-drawer" class="fixed top-0 right-0 h-full w-80 bg-white shadow-xl p-4 transform translate-x-full z-50">
+    <!-- Advanced Settings Drawer -->
+    <div id="advanced-drawer" class="fixed top-0 right-0 h-full w-80 bg-white shadow-xl p-4 transform translate-x-full z-50 transition-transform duration-300">
         <div class="flex justify-between items-center mb-4">
             <h2 class="text-base font-semibold">Advanced Settings</h2>
             <button id="close-drawer-btn" class="text-gray-500 hover:text-gray-800 text-2xl">&times;</button>
@@ -147,52 +139,87 @@
         
         <!-- Advanced Options Content -->
         <div class="space-y-0">
-            <!-- Additional Labor Section -->
+            <!-- Labor Design -->
             <div class="py-3">
-                <h3 class="text-sm font-medium text-gray-700 mb-3">Additional Labor</h3>
-                <div class="space-y-3">
-                    <div class="flex items-center justify-between">
-                        <span class="text-sm text-gray-700">Design</span>
-                        <div class="flex gap-2">
-                            <input type="number" id="design-time" placeholder="0" class="w-16 px-2 py-1 border border-gray-300 rounded text-sm">
-                            <select id="design-unit" class="px-2 py-1 border border-gray-300 rounded text-sm">
-                                <option value="minutes">Minutes</option>
-                                <option value="hours">Hours</option>
-                            </select>
-                        </div>
+                <div class="space-y-2">
+                    <div class="flex items-center space-x-3">
+                        <input type="checkbox" id="design-labor-checkbox" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                        <label for="design-labor-checkbox" class="text-sm text-gray-700 font-medium">Labor Design</label>
                     </div>
-                    <div class="flex items-center justify-between">
-                        <span class="text-sm text-gray-700">Weeding</span>
-                        <div class="flex gap-2">
-                            <input type="number" id="weeding-time" placeholder="0" class="w-16 px-2 py-1 border border-gray-300 rounded text-sm">
-                            <select id="weeding-unit" class="px-2 py-1 border border-gray-300 rounded text-sm">
-                                <option value="minutes">Minutes</option>
+                    <div class="ml-7 text-xs text-gray-500">$60.00 per hour</div>
+                    <div id="design-labor-inputs" class="ml-7 hidden mt-2">
+                        <div class="flex gap-x-2">
+                            <input type="number" id="design-labor-quantity" class="w-20 px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm" placeholder="0" min="0" step="0.1" />
+                            <select id="design-labor-unit" class="px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm">
                                 <option value="hours">Hours</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="flex items-center justify-between">
-                        <span class="text-sm text-gray-700">Masking</span>
-                        <div class="flex gap-2">
-                            <input type="number" id="masking-time" placeholder="0" class="w-16 px-2 py-1 border border-gray-300 rounded text-sm">
-                            <select id="masking-unit" class="px-2 py-1 border border-gray-300 rounded text-sm">
                                 <option value="minutes">Minutes</option>
-                                <option value="hours">Hours</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="flex items-center justify-between">
-                        <span class="text-sm text-gray-700">Finishing</span>
-                        <div class="flex gap-2">
-                            <input type="number" id="finishing-time" placeholder="0" class="w-16 px-2 py-1 border border-gray-300 rounded text-sm">
-                            <select id="finishing-unit" class="px-2 py-1 border border-gray-300 rounded text-sm">
-                                <option value="minutes">Minutes</option>
-                                <option value="hours">Hours</option>
                             </select>
                         </div>
                     </div>
                 </div>
-                <div class="text-xs text-gray-500 mt-2">$60.00 per hour</div>
+            </div>
+            <hr class="border-gray-200">
+            
+            <!-- Labor Decals -->
+            <div class="py-3">
+                <div class="space-y-2">
+                    <div class="flex items-center space-x-3">
+                        <input type="checkbox" id="decals-labor-checkbox" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                        <label for="decals-labor-checkbox" class="text-sm text-gray-700 font-medium">Labor Decals</label>
+                    </div>
+                    <div class="ml-7 text-xs text-gray-500">$28.00 per hour</div>
+                    <div id="decals-labor-inputs" class="ml-7 hidden mt-2">
+                        <div class="flex gap-x-2">
+                            <input type="number" id="decals-labor-quantity" class="w-20 px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm" placeholder="0" min="0" step="0.1" />
+                            <select id="decals-labor-unit" class="px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm">
+                                <option value="hours">Hours</option>
+                                <option value="minutes">Minutes</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <hr class="border-gray-200">
+            
+            <!-- Labor Finishing -->
+            <div class="py-3">
+                <div class="space-y-2">
+                    <div class="flex items-center space-x-3">
+                        <input type="checkbox" id="finishing-labor-checkbox" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                        <label for="finishing-labor-checkbox" class="text-sm text-gray-700 font-medium">Labor Finishing</label>
+                    </div>
+                    <div class="ml-7 text-xs text-gray-500">$28.00 per hour</div>
+                    <div id="finishing-labor-inputs" class="ml-7 hidden mt-2">
+                        <div class="flex gap-x-2">
+                            <input type="number" id="finishing-labor-quantity" class="w-20 px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm" placeholder="0" min="0" step="0.1" />
+                            <select id="finishing-labor-unit" class="px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm">
+                                <option value="hours">Hours</option>
+                                <option value="minutes">Minutes</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <hr class="border-gray-200">
+            
+            <!-- Labor Installing -->
+            <div class="py-3">
+                <div class="space-y-2">
+                    <div class="flex items-center space-x-3">
+                        <input type="checkbox" id="installing-labor-checkbox" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                        <label for="installing-labor-checkbox" class="text-sm text-gray-700 font-medium">Labor Installing</label>
+                    </div>
+                    <div class="ml-7 text-xs text-gray-500">$28.00 per hour</div>
+                    <div id="installing-labor-inputs" class="ml-7 hidden mt-2">
+                        <div class="flex gap-x-2">
+                            <input type="number" id="installing-labor-quantity" class="w-20 px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm" placeholder="0" min="0" step="0.1" />
+                            <select id="installing-labor-unit" class="px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm">
+                                <option value="hours">Hours</option>
+                                <option value="minutes">Minutes</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -202,15 +229,22 @@
             // === GLOBAL VARIABLES ===
             let isEditMode = false;
             let originalRowNumber = null;
-            let materialInventoryData = [];
+            
+            // === State Management ===
+            const state = {
+                materials: [], materialName: '', description: '', quantity: 1, width: '', height: '',
+                complexShape: false, doubleSided: false, lamination: false,
+                designTime: '', laborDecalsTime: '', laborFinishingTime: '', laborInstallingTime: '',
+                designTimeUnit: 'Minutes', laborDecalsTimeUnit: 'Minutes', laborFinishingTimeUnit: 'Minutes', laborInstallingTimeUnit: 'Minutes',
+                margin: 60, isDrawerOpen: false,
+            };
 
             // === DOM ELEMENTS ===
             const drawer = document.getElementById('advanced-drawer');
             const drawerTrigger = document.getElementById('drawer-trigger');
             const closeDrawerBtn = document.getElementById('close-drawer-btn');
-            const materialSelect = document.getElementById('material');
-            const addToProjectBtn = document.getElementById('add-to-project-btn');
             const resetBtn = document.getElementById('reset-btn');
+            const addToProjectBtn = document.getElementById('add-to-project-btn');
 
             // === EDIT MODE INITIALIZATION ===
             if (window.editFormData) {
@@ -218,273 +252,191 @@
                 originalRowNumber = window.editFormData.originalRowNumber;
                 
                 addToProjectBtn.textContent = 'Update Project';
-                document.querySelector('h1').textContent = 'Edit PrintCut Estimate';
+                document.querySelector('h1').textContent = 'Edit Printing Cost Calculator';
                 
-                setTimeout(() => populateFormData(window.editFormData), 500);
+                setTimeout(() => populateFormData(window.editFormData), 100);
             }
 
-            // === UTILITY FUNCTIONS ===
-            function getInputValue(id) {
-                const el = document.getElementById(id);
-                if (el.value === '') return parseFloat(el.placeholder) || 0;
-                return parseFloat(el.value) || 0;
-            }
+            // === Helper Functions ===
+            const formatCurrency = (value) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(isNaN(value) ? 0 : value);
+            const getTimeInHours = (time, unit) => {
+                const numTime = Number(time) || 0;
+                return unit === 'Minutes' ? numTime / 60 : numTime;
+            };
 
-            function isChecked(id) { 
-                return document.getElementById(id).checked; 
-            }
-
-            function formatCurrency(value) { 
-                return isNaN(value) ? '$0.00' : value.toLocaleString('en-US', { style: 'currency', currency: 'USD' }); 
-            }
-            
-            function resetCosts() {
-                document.getElementById('total-cost').textContent = '$0.00';
-                document.getElementById('total-price').textContent = '$0.00';
-                document.getElementById('unit-price').textContent = '$0.00';
-            }
-
+            // === Calculation Logic ===
             function calculateEstimate() {
-                const errorDiv = document.getElementById('error-message');
-                errorDiv.textContent = '';
+                const errorMessageDiv = document.getElementById('error-message');
+                errorMessageDiv.textContent = '';
+                errorMessageDiv.classList.add('hidden');
 
-                const qty = getInputValue('qty');
-                const artWidth = getInputValue('width');
-                const artHeight = getInputValue('height');
-                const isDoubleSided = isChecked('double-sided');
-                const isComplex = isChecked('complex-shape');
-                const isLamination = isChecked('lamination');
+                const selectedMaterial = state.materials.find(m => m.name === state.materialName);
+
+                if (!selectedMaterial || !state.quantity || !state.width || !state.height) {
+                    resetCostsUI();
+                    return;
+                }
+                
+                const qty = Number(state.quantity) || 0;
+                const artWidth = Number(state.width) || 0;
+                const artHeight = Number(state.height) || 0;
                 const bleed = 0.25;
                 const spacing = 0.25;
                 const artWidthTotal = artWidth + bleed;
                 const artHeightTotal = artHeight + bleed;
 
-                if (qty <= 0 || artWidth <= 0 || artHeight <= 0) {
-                    resetCosts();
-                    return;
-                }
-
                 let materialCost = 0;
                 let totalLinearFeet = 0;
-                const selectedMaterial = materialSelect.selectedOptions[0];
-                
-                if (selectedMaterial && !selectedMaterial.disabled) {
-                    const matType = selectedMaterial.dataset.type;
-                    
-                    if (matType === 'Roll') {
-                        const rollWidth = parseFloat(selectedMaterial.dataset.width);
-                        if (artWidthTotal > rollWidth && artHeightTotal > rollWidth) {
-                            errorDiv.textContent = 'Artwork is wider than the selected roll.';
-                            resetCosts();
-                            return;
-                        }
 
-                        const linFtCost = parseFloat(selectedMaterial.dataset.linFtCost);
-                        
-                        const colsPortrait = Math.floor((rollWidth + spacing) / (artWidthTotal + spacing));
-                        const colsLandscape = Math.floor((rollWidth + spacing) / (artHeightTotal + spacing));
-                        
-                        let numColumns = Math.max(colsPortrait, colsLandscape, 1);
-                        let layoutRow = artHeightTotal;
-
-                        if (colsLandscape > colsPortrait) {
-                            layoutRow = artWidthTotal;
-                        }
-
-                        if (rollWidth > 0 && artWidthTotal > 0 && artHeightTotal > 0) {
-                            const numRows = Math.ceil(qty / numColumns);
-                            const totalLinearInches = (numRows * layoutRow) + ((numRows - 1) * spacing);
-                            totalLinearFeet = totalLinearInches / 12;
-                            materialCost = (totalLinearFeet + 2.5) * linFtCost;
-                        }
-                        
-                    } else if (matType === 'Sheet') {
-                        const sheetWidth = parseFloat(selectedMaterial.dataset.width);
-                        const sheetHeight = parseFloat(selectedMaterial.dataset.height);
-                        const artFitsPortrait = (artWidthTotal <= sheetWidth && artHeightTotal <= sheetHeight);
-                        const artFitsLandscape = (artWidthTotal <= sheetHeight && artHeightTotal <= sheetWidth);
-                        
-                        if (!artFitsPortrait && !artFitsLandscape) {
-                            errorDiv.textContent = 'Artwork is larger than the selected sheet.';
-                            resetCosts();
-                            return;
-                        }
-
-                        const sheetCost = parseFloat(selectedMaterial.dataset.sheetCost);
-                        const perSheet1 = artFitsPortrait ? Math.floor((sheetWidth + spacing) / (artWidthTotal + spacing)) * Math.floor((sheetHeight + spacing) / (artHeightTotal + spacing)) : 0;
-                        const perSheet2 = artFitsLandscape ? Math.floor((sheetWidth + spacing) / (artHeightTotal + spacing)) * Math.floor((sheetHeight + spacing) / (artWidthTotal + spacing)) : 0;
-                        const piecesPerSheet = Math.max(perSheet1, perSheet2, 1);
-                        const totalSheets = Math.ceil(qty / piecesPerSheet);
-                        let calculatedMaterialCost = totalSheets * sheetCost;
-                        const halfSheetCost = sheetCost * 0.5;
-                        materialCost = Math.max(calculatedMaterialCost, halfSheetCost);
+                if (selectedMaterial.type === 'ROLL') {
+                    const rollWidth = selectedMaterial.width;
+                    if (artWidthTotal > rollWidth && artHeightTotal > rollWidth) {
+                        errorMessageDiv.textContent = 'Artwork is wider than the selected roll.';
+                        errorMessageDiv.classList.remove('hidden');
+                        resetCostsUI();
+                        return;
                     }
+                    const linFtCost = selectedMaterial.costLinFt;
+                    const colsPortrait = Math.floor((rollWidth + spacing) / (artWidthTotal + spacing));
+                    const colsLandscape = Math.floor((rollWidth + spacing) / (artHeightTotal + spacing));
+                    let numColumns = Math.max(colsPortrait, colsLandscape, 1);
+                    let layoutRow = artHeightTotal;
+                    if (colsLandscape > colsPortrait) layoutRow = artWidthTotal;
+                    const numRows = Math.ceil(qty / numColumns);
+                    const totalLinearInches = (numRows * layoutRow) + ((numRows - 1) * spacing);
+                    totalLinearFeet = totalLinearInches / 12;
+                    materialCost = (totalLinearFeet + 2.5) * linFtCost;
+                } else if (selectedMaterial.type === 'SHEET') {
+                    const sheetWidth = selectedMaterial.width;
+                    const sheetHeight = selectedMaterial.height;
+                    const artFitsPortrait = (artWidthTotal <= sheetWidth && artHeightTotal <= sheetHeight);
+                    const artFitsLandscape = (artWidthTotal <= sheetHeight && artHeightTotal <= sheetWidth);
+                    if (!artFitsPortrait && !artFitsLandscape) {
+                        errorMessageDiv.textContent = 'Artwork is larger than the selected sheet.';
+                        errorMessageDiv.classList.remove('hidden');
+                        resetCostsUI();
+                        return;
+                    }
+                    const sheetCost = selectedMaterial.costSheet;
+                    const perSheet1 = artFitsPortrait ? Math.floor((sheetWidth + spacing) / (artWidthTotal + spacing)) * Math.floor((sheetHeight + spacing) / (artHeightTotal + spacing)) : 0;
+                    const perSheet2 = artFitsLandscape ? Math.floor((sheetWidth + spacing) / (artHeightTotal + spacing)) * Math.floor((sheetHeight + spacing) / (artWidthTotal + spacing)) : 0;
+                    const piecesPerSheet = Math.max(perSheet1, perSheet2, 1);
+                    const totalSheets = Math.ceil(qty / piecesPerSheet);
+                    let calculatedMaterialCost = totalSheets * sheetCost;
+                    const halfSheetCost = sheetCost * 0.5;
+                    materialCost = Math.max(calculatedMaterialCost, halfSheetCost);
                 }
 
                 const singlePieceSqFt = (artWidthTotal * artHeightTotal) / 144;
                 let totalArtworkSqFt = singlePieceSqFt * qty;
-                if (isDoubleSided) {
-                    totalArtworkSqFt *= 2;
-                }
-                
+                if (state.doubleSided) totalArtworkSqFt *= 2;
                 const totalArtworkPerimeter = (artWidth * 2 + artHeight * 2) * qty;
-
                 const printTimeHours = (totalArtworkSqFt / 0.83) / 60;
                 let cutTimeHours = (totalArtworkPerimeter / 120) / 60;
-                if (isComplex) cutTimeHours *= 1.5;
+                if (state.complexShape) cutTimeHours *= 1.5;
                 const ripTimeHours = (totalArtworkSqFt / 20.52) / 60;
                 const printComputeTimeHours = (totalArtworkSqFt / 6.2) / 60;
-                
-                let designTimeInHours = getInputValue('design-time');
-                if (document.getElementById('design-unit').value === 'minutes') designTimeInHours /= 60;
-                
-                let weedingTime = getInputValue('weeding-time');
-                if (document.getElementById('weeding-unit').value === 'minutes') weedingTime /= 60;
-                let maskingTime = getInputValue('masking-time');
-                if (document.getElementById('masking-unit').value === 'minutes') maskingTime /= 60;
-                let finishingTime = getInputValue('finishing-time');
-                if (document.getElementById('finishing-unit').value === 'minutes') finishingTime /= 60;
-                
-                const manualOperatorTimeInHours = weedingTime + maskingTime + finishingTime;
-                
+                const designTimeInHours = getTimeInHours(state.designTime, state.designTimeUnit);
+                const laborDecalsTimeInHours = getTimeInHours(state.laborDecalsTime, state.laborDecalsTimeUnit);
+                const laborFinishingTimeInHours = getTimeInHours(state.laborFinishingTime, state.laborFinishingTimeUnit);
+                const laborInstallingTimeInHours = getTimeInHours(state.laborInstallingTime, state.laborInstallingTimeUnit);
+                const manualOperatorTimeInHours = laborDecalsTimeInHours + laborFinishingTimeInHours + laborInstallingTimeInHours;
                 const totalProjectRunTimeHours = printTimeHours + cutTimeHours + ripTimeHours + printComputeTimeHours;
-                
                 const inkCost = totalArtworkSqFt * 0.165;
                 const cuttingCost = cutTimeHours * 25.00;
                 const baseDesignCost = (totalArtworkSqFt / 25) * 0.0625 * 60.00;
                 const manualDesignCost = designTimeInHours * 60.00;
                 const designCost = baseDesignCost + manualDesignCost;
-                
                 let laminationCost = 0;
-                if (isLamination) {
-                    if (selectedMaterial && selectedMaterial.dataset.type === 'Roll') {
-                        laminationCost = totalLinearFeet * 1.02;
-                    } else {
-                        // For sheets, approximate lamination cost based on total square footage
-                        // Cost per sq ft = 1.02 / (54/12) = $0.2267
-                        laminationCost = totalArtworkSqFt * 0.2267;
-                    }
+                if (state.lamination) {
+                    if (selectedMaterial.type === 'ROLL') laminationCost = totalLinearFeet * 1.02;
+                    else laminationCost = totalArtworkSqFt * 0.2267;
                 }
-                
                 const equipmentCost = totalProjectRunTimeHours * 4.95;
                 const operatorCost = (totalProjectRunTimeHours + manualOperatorTimeInHours) * 28.00;
+                const calculatedTotalCosts = materialCost + inkCost + cuttingCost + designCost + equipmentCost + operatorCost + laminationCost;
+                const numMargin = Number(state.margin) || 0;
+                let calculatedTotalPrice = calculatedTotalCosts;
+                if (numMargin < 100 && numMargin >= 0) calculatedTotalPrice = calculatedTotalCosts / (1 - (numMargin / 100));
+                const calculatedUnitPrice = qty > 0 ? calculatedTotalPrice / qty : 0;
 
-                const totalCost = materialCost + inkCost + cuttingCost + designCost + equipmentCost + operatorCost + laminationCost;
-                const margin = getInputValue('margin') / 100;
-                let totalPrice = totalCost;
-                if (margin < 1 && margin >= 0) {
-                    totalPrice = totalCost / (1 - margin);
-                } else if (margin < 0) {
-                    totalPrice = totalCost / (1 - margin);
-                } else {
-                    totalPrice = totalCost;
-                }
-                const unitPrice = (qty > 0) ? totalPrice / qty : 0;
-                
-                document.getElementById('total-cost').textContent = `${totalCost.toFixed(2)}`;
-                document.getElementById('total-price').textContent = `${totalPrice.toFixed(2)}`;
-                document.getElementById('unit-price').textContent = `${unitPrice.toFixed(2)}`;
+                updateCostsUI(calculatedTotalCosts, calculatedTotalPrice, calculatedUnitPrice);
             }
 
-            function collectFormData() {
-                const formData = {
-                    description: document.getElementById('description').value.trim(),
-                    material: materialSelect.value,
-                    quantity: getInputValue('qty'),
-                    width: getInputValue('width'),
-                    height: getInputValue('height'),
-                    complexShape: isChecked('complex-shape'),
-                    doubleSided: isChecked('double-sided'),
-                    lamination: isChecked('lamination'),
-                    margin: getInputValue('margin'),
-                    additionalLabor: {
-                        design: { time: getInputValue('design-time'), unit: document.getElementById('design-unit').value },
-                        weeding: { time: getInputValue('weeding-time'), unit: document.getElementById('weeding-unit').value },
-                        masking: { time: getInputValue('masking-time'), unit: document.getElementById('masking-unit').value },
-                        finishing: { time: getInputValue('finishing-time'), unit: document.getElementById('finishing-unit').value }
-                    }
-                };
-
-                if (isEditMode && originalRowNumber) {
-                    formData.originalRowNumber = originalRowNumber;
-                }
-
-                return formData;
+            // === UI Update Functions ===
+            function updateCostsUI(total, price, unit) {
+                document.getElementById('total-cost').textContent = formatCurrency(total);
+                document.getElementById('total-price').textContent = formatCurrency(price);
+                document.getElementById('unit-price').textContent = formatCurrency(unit);
             }
 
-            function populateFormData(formData) {
-                if (!formData) return;
-
-                if (formData.originalRowNumber) {
-                    isEditMode = true;
-                    originalRowNumber = formData.originalRowNumber;
-                    
-                    addToProjectBtn.textContent = 'Update Project';
-                    document.querySelector('h1').textContent = 'Edit PrintCut Estimate';
-                }
-
-                if (formData.description) document.getElementById('description').value = formData.description;
-                if (formData.material) materialSelect.value = formData.material;
-                if (formData.quantity) document.getElementById('qty').value = formData.quantity;
-                if (formData.width) document.getElementById('width').value = formData.width;
-                if (formData.height) document.getElementById('height').value = formData.height;
-                if (formData.margin !== undefined) document.getElementById('margin').value = formData.margin;
-
-                if (formData.complexShape) document.getElementById('complex-shape').checked = true;
-                if (formData.doubleSided) document.getElementById('double-sided').checked = true;
-                if (formData.lamination) document.getElementById('lamination').checked = true;
-
-                if (formData.additionalLabor) {
-                    const labor = formData.additionalLabor;
-
-                    if (labor.design && labor.design.time > 0) {
-                        document.getElementById('design-time').value = labor.design.time;
-                        document.getElementById('design-unit').value = labor.design.unit;
-                    }
-                    if (labor.weeding && labor.weeding.time > 0) {
-                        document.getElementById('weeding-time').value = labor.weeding.time;
-                        document.getElementById('weeding-unit').value = labor.weeding.unit;
-                    }
-                    if (labor.masking && labor.masking.time > 0) {
-                        document.getElementById('masking-time').value = labor.masking.time;
-                        document.getElementById('masking-unit').value = labor.masking.unit;
-                    }
-                    if (labor.finishing && labor.finishing.time > 0) {
-                        document.getElementById('finishing-time').value = labor.finishing.time;
-                        document.getElementById('finishing-unit').value = labor.finishing.unit;
-                    }
-                }
-
-                setTimeout(calculateEstimate, 100);
+            function resetCostsUI() {
+                updateCostsUI(0, 0, 0);
             }
 
-            function handleSubmit() {
-                const description = document.getElementById('description').value.trim();
-                const quantity = getInputValue('qty');
-                const totalPriceText = document.getElementById('total-price').textContent;
+            function resetForm() {
+                Object.assign(state, {
+                    description: '', materialName: '', quantity: 1, width: '', height: '',
+                    complexShape: false, doubleSided: false, lamination: false,
+                    designTime: '', laborDecalsTime: '', laborFinishingTime: '', laborInstallingTime: '',
+                    designTimeUnit: 'Minutes', laborDecalsTimeUnit: 'Minutes', laborFinishingTimeUnit: 'Minutes', laborInstallingTimeUnit: 'Minutes',
+                    margin: 60, isDrawerOpen: false,
+                });
+                document.getElementById('description').value = '';
+                document.getElementById('material').value = '';
+                document.getElementById('quantity').value = '1';
+                document.getElementById('width').value = '';
+                document.getElementById('height').value = '';
+                document.getElementById('margin').value = '60';
+                document.getElementById('complexShape').checked = false;
+                document.getElementById('doubleSided').checked = false;
+                document.getElementById('lamination').checked = false;
                 
-                const totalPrice = parseFloat(totalPriceText.replace(/[^0-9.-]+/g, '')) || 0;
+                // Reset advanced options
+                document.getElementById('design-labor-checkbox').checked = false;
+                document.getElementById('decals-labor-checkbox').checked = false;
+                document.getElementById('finishing-labor-checkbox').checked = false;
+                document.getElementById('installing-labor-checkbox').checked = false;
                 
-                if (!description) {
-                    alert('Please enter a description before adding to project.');
+                document.getElementById('design-labor-inputs').classList.add('hidden');
+                document.getElementById('decals-labor-inputs').classList.add('hidden');
+                document.getElementById('finishing-labor-inputs').classList.add('hidden');
+                document.getElementById('installing-labor-inputs').classList.add('hidden');
+                
+                document.getElementById('design-labor-quantity').value = '';
+                document.getElementById('decals-labor-quantity').value = '';
+                document.getElementById('finishing-labor-quantity').value = '';
+                document.getElementById('installing-labor-quantity').value = '';
+                
+                document.getElementById('design-labor-unit').value = 'hours';
+                document.getElementById('decals-labor-unit').value = 'hours';
+                document.getElementById('finishing-labor-unit').value = 'hours';
+                document.getElementById('installing-labor-unit').value = 'hours';
+                
+                calculateEstimate();
+            }
+
+            function sendDataToProject() {
+                const description = state.description || 'Description Details';
+                const width = Number(state.width) || 0;
+                const height = Number(state.height) || 0;
+                const formattedDescription = `${description} - (${width}" x ${height}")`;
+
+                const qty = Number(state.quantity) || 0;
+                const priceText = document.getElementById('total-price').textContent;
+                const totalPrice = parseFloat(priceText.replace(/[^0-9.-]+/g,""));
+                const unitPrice = qty > 0 ? totalPrice / qty : 0;
+                if (isNaN(qty) || isNaN(unitPrice) || isNaN(totalPrice) || qty === 0) {
+                    alert("Please enter a valid quantity before adding to the project.");
                     return;
                 }
                 
-                if (!quantity || quantity <= 0) {
-                    alert('Please enter a valid quantity.');
-                    return;
-                }
-                
-                if (totalPrice <= 0) {
-                    alert('Please configure your estimate to calculate a total price.');
-                    return;
-                }
-                
+                // Collect complete form data
                 const completeFormData = collectFormData();
                 
                 const printingData = {
-                    description: description,
-                    quantity: parseInt(quantity),
+                    description: formattedDescription,
+                    quantity: qty,
                     totalPrice: totalPrice,
                     formData: completeFormData,
                     originalRowNumber: isEditMode ? originalRowNumber : null
@@ -522,76 +474,165 @@
                     .addPrintingToProject(printingData);
             }
 
+            function collectFormData() {
+                const formData = {
+                    description: state.description,
+                    materialName: state.materialName,
+                    quantity: state.quantity,
+                    width: state.width,
+                    height: state.height,
+                    complexShape: state.complexShape,
+                    doubleSided: state.doubleSided,
+                    lamination: state.lamination,
+                    designTime: state.designTime,
+                    laborDecalsTime: state.laborDecalsTime,
+                    laborFinishingTime: state.laborFinishingTime,
+                    laborInstallingTime: state.laborInstallingTime,
+                    designTimeUnit: state.designTimeUnit,
+                    laborDecalsTimeUnit: state.laborDecalsTimeUnit,
+                    laborFinishingTimeUnit: state.laborFinishingTimeUnit,
+                    laborInstallingTimeUnit: state.laborInstallingTimeUnit,
+                    margin: state.margin
+                };
+
+                if (isEditMode && originalRowNumber) {
+                    formData.originalRowNumber = originalRowNumber;
+                }
+
+                return formData;
+            }
+
+            function populateFormData(formData) {
+                if (!formData) return;
+
+                if (formData.originalRowNumber) {
+                    isEditMode = true;
+                    originalRowNumber = formData.originalRowNumber;
+                    
+                    addToProjectBtn.textContent = 'Update Project';
+                    document.querySelector('h1').textContent = 'Edit Printing Cost Calculator';
+                }
+
+                if (formData.description) document.getElementById('description').value = formData.description;
+                if (formData.materialName) {
+                    state.materialName = formData.materialName;
+                    document.getElementById('material').value = formData.materialName;
+                }
+                if (formData.quantity) {
+                    state.quantity = formData.quantity;
+                    document.getElementById('quantity').value = formData.quantity;
+                }
+                if (formData.width) {
+                    state.width = formData.width;
+                    document.getElementById('width').value = formData.width;
+                }
+                if (formData.height) {
+                    state.height = formData.height;
+                    document.getElementById('height').value = formData.height;
+                }
+                if (formData.margin !== undefined) {
+                    state.margin = formData.margin;
+                    document.getElementById('margin').value = formData.margin;
+                }
+
+                if (formData.complexShape) {
+                    state.complexShape = true;
+                    document.getElementById('complexShape').checked = true;
+                }
+                if (formData.doubleSided) {
+                    state.doubleSided = true;
+                    document.getElementById('doubleSided').checked = true;
+                }
+                if (formData.lamination) {
+                    state.lamination = true;
+                    document.getElementById('lamination').checked = true;
+                }
+
+                // Advanced labor options
+                if (formData.designTime) {
+                    state.designTime = formData.designTime;
+                    document.getElementById('design-labor-checkbox').checked = true;
+                    document.getElementById('design-labor-inputs').classList.remove('hidden');
+                    document.getElementById('design-labor-quantity').value = formData.designTime;
+                    document.getElementById('design-labor-unit').value = formData.designTimeUnit === 'Minutes' ? 'minutes' : 'hours';
+                }
+                if (formData.laborDecalsTime) {
+                    state.laborDecalsTime = formData.laborDecalsTime;
+                    document.getElementById('decals-labor-checkbox').checked = true;
+                    document.getElementById('decals-labor-inputs').classList.remove('hidden');
+                    document.getElementById('decals-labor-quantity').value = formData.laborDecalsTime;
+                    document.getElementById('decals-labor-unit').value = formData.laborDecalsTimeUnit === 'Minutes' ? 'minutes' : 'hours';
+                }
+                if (formData.laborFinishingTime) {
+                    state.laborFinishingTime = formData.laborFinishingTime;
+                    document.getElementById('finishing-labor-checkbox').checked = true;
+                    document.getElementById('finishing-labor-inputs').classList.remove('hidden');
+                    document.getElementById('finishing-labor-quantity').value = formData.laborFinishingTime;
+                    document.getElementById('finishing-labor-unit').value = formData.laborFinishingTimeUnit === 'Minutes' ? 'minutes' : 'hours';
+                }
+                if (formData.laborInstallingTime) {
+                    state.laborInstallingTime = formData.laborInstallingTime;
+                    document.getElementById('installing-labor-checkbox').checked = true;
+                    document.getElementById('installing-labor-inputs').classList.remove('hidden');
+                    document.getElementById('installing-labor-quantity').value = formData.laborInstallingTime;
+                    document.getElementById('installing-labor-unit').value = formData.laborInstallingTimeUnit === 'Minutes' ? 'minutes' : 'hours';
+                }
+
+                setTimeout(calculateEstimate, 100);
+            }
+
             function resetFormToNewMode() {
                 resetForm();
                 isEditMode = false;
                 originalRowNumber = null;
                 addToProjectBtn.textContent = 'Add to Project';
-                document.querySelector('h1').textContent = 'PrintCut Estimate';
+                document.querySelector('h1').textContent = 'Printing Cost Calculator';
+            }
+            
+            // === DOM Initialization ===
+            google.script.run.withSuccessHandler(materials => {
+                console.log('Materials received:', materials);
+                state.materials = materials.map(m => ({
+                    name: m[0], type: m[1], width: parseFloat(m[2]), height: parseFloat(m[3]), costSheet: parseFloat(m[4]), costLinFt: parseFloat(m[5])
+                }));
+                const materialSelect = document.getElementById('material');
                 
+                // Clear existing options
+                materialSelect.innerHTML = '<option value="">Select Material</option>';
+                
+                state.materials.forEach(m => {
+                    const option = document.createElement('option');
+                    option.value = m.name;
+                    option.textContent = m.name;
+                    materialSelect.appendChild(option);
+                });
+                
+                // If in edit mode, populate after materials are loaded
                 if (window.editFormData) {
-                    delete window.editFormData;
+                    setTimeout(() => populateFormData(window.editFormData), 200);
                 }
-            }
+            }).withFailureHandler(error => {
+                console.error('Error loading materials:', error);
+                const materialSelect = document.getElementById('material');
+                materialSelect.innerHTML = '<option value="">Error loading materials</option>';
+            }).getPrintingMaterials();
 
-            function resetForm() {
-                const elements = [
-                    'description', 'qty', 'width', 'height',
-                    'design-time', 'weeding-time', 'masking-time', 'finishing-time'
-                ];
-                
-                elements.forEach(id => {
-                    const element = document.getElementById(id);
-                    if (element) {
-                        element.value = '';
-                    }
-                });
-                
-                materialSelect.selectedIndex = 0;
-                document.getElementById('margin').value = '50';
-                
-                const checkboxes = ['complex-shape', 'double-sided', 'lamination'];
-                checkboxes.forEach(id => {
-                    const checkbox = document.getElementById(id);
-                    if (checkbox) checkbox.checked = false;
-                });
-                
-                document.getElementById('design-unit').value = 'minutes';
-                document.getElementById('weeding-unit').value = 'minutes';
-                document.getElementById('masking-unit').value = 'minutes';
-                document.getElementById('finishing-unit').value = 'minutes';
-                
-                const summaryElements = ['total-cost', 'total-price', 'unit-price'];
-                summaryElements.forEach(id => {
-                    const element = document.getElementById(id);
-                    if (element) element.textContent = '$0.00';
-                });
-                
-                document.getElementById('error-message').textContent = '';
-            }
-
-            // === EVENT LISTENERS ===
-            
-            materialSelect.addEventListener('change', calculateEstimate);
-            
-            const inputElements = ['qty', 'width', 'height', 'margin', 'design-time', 'weeding-time', 'masking-time', 'finishing-time'];
-            inputElements.forEach(id => {
-                const element = document.getElementById(id);
-                if (element) element.addEventListener('input', calculateEstimate);
+            // Setup all event listeners
+            document.getElementById('description').addEventListener('input', (e) => { state.description = e.target.value; });
+            document.getElementById('material').addEventListener('change', (e) => { state.materialName = e.target.value; calculateEstimate(); });
+            ['quantity', 'width', 'height', 'margin'].forEach(id => {
+                document.getElementById(id).addEventListener('input', (e) => { state[id] = e.target.value; calculateEstimate(); });
             });
             
-            const checkboxElements = ['complex-shape', 'double-sided', 'lamination'];
-            checkboxElements.forEach(id => {
-                const element = document.getElementById(id);
-                if (element) element.addEventListener('change', calculateEstimate);
-            });
+            // Option checkboxes
+            document.getElementById('complexShape').addEventListener('change', (e) => { state.complexShape = e.target.checked; calculateEstimate(); });
+            document.getElementById('doubleSided').addEventListener('change', (e) => { state.doubleSided = e.target.checked; calculateEstimate(); });
+            document.getElementById('lamination').addEventListener('change', (e) => { state.lamination = e.target.checked; calculateEstimate(); });
             
-            const dropdownElements = ['design-unit', 'weeding-unit', 'masking-unit', 'finishing-unit'];
-            dropdownElements.forEach(id => {
-                const element = document.getElementById(id);
-                if (element) element.addEventListener('change', calculateEstimate);
-            });
+            document.getElementById('reset-btn').addEventListener('click', resetForm);
+            document.getElementById('add-to-project-btn').addEventListener('click', sendDataToProject);
             
+            // Drawer functionality
             if (drawerTrigger && drawer) {
                 drawerTrigger.addEventListener('click', function() {
                     drawer.classList.remove('translate-x-full');
@@ -602,91 +643,44 @@
                     drawer.classList.add('translate-x-full');
                 });
             }
-            
-            if (resetBtn) resetBtn.addEventListener('click', resetForm);
-            if (addToProjectBtn) addToProjectBtn.addEventListener('click', handleSubmit);
 
-            // === INITIALIZATION ===
-            
-            // Load material data from Materials sheet (filtered for PRINT)
-            google.script.run
-                .withSuccessHandler(function(materials) {
-                    console.log('Materials received:', materials); // Debug log
-                    
-                    // Hide loading message
-                    const loadingMessage = document.getElementById('loading-message');
-                    if (loadingMessage) {
-                        loadingMessage.style.display = 'none';
-                    }
-                    
-                    if (materials && materials.length > 0) {
-                        materialInventoryData = materials;
-                        
-                        // Clear existing options (including loading option)
-                        materialSelect.innerHTML = '';
-                        
-                        // Add default option
-                        let defaultOption = document.createElement('option');
-                        defaultOption.textContent = 'Select a material...';
-                        defaultOption.disabled = true;
-                        defaultOption.selected = true;
-                        materialSelect.appendChild(defaultOption);
-                        
-                        // Add material options
-                        materials.forEach(material => {
-                            let option = document.createElement('option');
-                            option.value = material[0]; // Material name
-                            option.textContent = material[0]; // Material name
-                            option.dataset.type = material[1]; // Type (Roll/Sheet)
-                            option.dataset.width = material[2]; // Width
-                            option.dataset.height = material[3]; // Height
-                            option.dataset.sheetCost = material[4]; // Sheet cost
-                            option.dataset.linFtCost = material[5]; // Linear foot cost
-                            materialSelect.appendChild(option);
-                            console.log('Added material:', material[0]); // Debug log
-                        });
-                        
-                        // If in edit mode, populate after materials are loaded
-                        if (window.editFormData) {
-                            setTimeout(() => populateFormData(window.editFormData), 100);
-                        }
+            // Advanced labor checkboxes and inputs
+            const advancedLabor = [
+                { checkbox: 'design-labor-checkbox', inputs: 'design-labor-inputs', quantity: 'design-labor-quantity', unit: 'design-labor-unit', stateTime: 'designTime', stateUnit: 'designTimeUnit' },
+                { checkbox: 'decals-labor-checkbox', inputs: 'decals-labor-inputs', quantity: 'decals-labor-quantity', unit: 'decals-labor-unit', stateTime: 'laborDecalsTime', stateUnit: 'laborDecalsTimeUnit' },
+                { checkbox: 'finishing-labor-checkbox', inputs: 'finishing-labor-inputs', quantity: 'finishing-labor-quantity', unit: 'finishing-labor-unit', stateTime: 'laborFinishingTime', stateUnit: 'laborFinishingTimeUnit' },
+                { checkbox: 'installing-labor-checkbox', inputs: 'installing-labor-inputs', quantity: 'installing-labor-quantity', unit: 'installing-labor-unit', stateTime: 'laborInstallingTime', stateUnit: 'laborInstallingTimeUnit' }
+            ];
+
+            advancedLabor.forEach(labor => {
+                const checkbox = document.getElementById(labor.checkbox);
+                const inputs = document.getElementById(labor.inputs);
+                const quantityInput = document.getElementById(labor.quantity);
+                const unitSelect = document.getElementById(labor.unit);
+
+                checkbox.addEventListener('change', function() {
+                    if (this.checked) {
+                        inputs.classList.remove('hidden');
                     } else {
-                        console.log('No materials found or empty array returned');
-                        // Clear loading option and add no materials message
-                        materialSelect.innerHTML = '';
-                        let noMaterialsOption = document.createElement('option');
-                        noMaterialsOption.textContent = 'No PRINT materials found';
-                        noMaterialsOption.disabled = true;
-                        noMaterialsOption.selected = true;
-                        materialSelect.appendChild(noMaterialsOption);
+                        inputs.classList.add('hidden');
+                        state[labor.stateTime] = '';
+                        quantityInput.value = '';
                     }
                     calculateEstimate();
-                })
-                .withFailureHandler(function(err) {
-                    console.error("Failed to load materials:", err);
-                    
-                    // Hide loading message
-                    const loadingMessage = document.getElementById('loading-message');
-                    if (loadingMessage) {
-                        loadingMessage.style.display = 'none';
-                    }
-                    
-                    // Add error option to dropdown
-                    materialSelect.innerHTML = '';
-                    let errorOption = document.createElement('option');
-                    errorOption.textContent = 'Error loading materials';
-                    errorOption.disabled = true;
-                    errorOption.selected = true;
-                    materialSelect.appendChild(errorOption);
-                    
-                    // Show error in error message div
-                    const errorDiv = document.getElementById('error-message');
-                    if (errorDiv) {
-                        errorDiv.textContent = 'Failed to load materials: ' + err.message;
-                        errorDiv.style.color = '#dc2626';
-                    }
-                })
-                .getPrintingMaterials();
+                });
+
+                quantityInput.addEventListener('input', (e) => {
+                    state[labor.stateTime] = e.target.value;
+                    calculateEstimate();
+                });
+
+                unitSelect.addEventListener('change', (e) => {
+                    state[labor.stateUnit] = e.target.value === 'minutes' ? 'Minutes' : 'Hours';
+                    calculateEstimate();
+                });
+            });
+
+            updateCostsUI(0, 0, 0);
         });
     </script>
 </body>
