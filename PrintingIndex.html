@@ -411,56 +411,71 @@
         }
 
         function sendDataToProject() {
-            const description = state.description || 'Description Details';
-            const width = Number(state.width) || 0;
-            const height = Number(state.height) || 0;
-            const formattedDescription = `${description} - (${width}" x ${height}")`;
+    const description = state.description || '';
+    const width = Number(state.width) || 0;
+    const height = Number(state.height) || 0;
+    const formattedDescription = `${description} (${width}" x ${height}")`;
 
-            const qty = Number(state.quantity) || 0;
-            const priceText = document.getElementById('total-price').textContent;
-            const totalPrice = parseFloat(priceText.replace(/[^0-9.-]+/g,""));
+    const qty = Number(state.quantity) || 0;
+    const priceText = document.getElementById('total-price').textContent;
+    const totalPrice = parseFloat(priceText.replace(/[^0-9.-]+/g,"")) || 0;
+    
+    if (!description) {
+        alert('Please enter a description before adding to project.');
+        return;
+    }
+    
+    if (isNaN(qty) || qty <= 0) {
+        alert('Please enter a valid quantity.');
+        return;
+    }
+    
+    if (totalPrice <= 0) {
+        alert('Please configure your estimate to calculate a total price.');
+        return;
+    }
+
+    const completeFormData = collectFormData();
+    
+    const printingData = {
+        description: formattedDescription,
+        quantity: qty,
+        totalPrice: totalPrice,
+        formData: completeFormData,
+        originalRowNumber: isEditMode ? originalRowNumber : null
+    };
+
+    const addToProjectBtn = document.getElementById('add-to-project-btn');
+    addToProjectBtn.disabled = true;
+    const originalButtonText = addToProjectBtn.textContent;
+    addToProjectBtn.textContent = isEditMode ? 'Updating...' : 'Adding...';
+    addToProjectBtn.classList.add('opacity-50');
+
+    google.script.run
+        .withSuccessHandler(function(result) {
+            addToProjectBtn.disabled = false;
+            addToProjectBtn.textContent = originalButtonText;
+            addToProjectBtn.classList.remove('opacity-50');
             
-            if (isNaN(qty) || qty <= 0 || isNaN(totalPrice)) {
-                alert("Please ensure quantity and all required fields are filled out correctly.");
-                return;
+            if (result.success) {
+                if (result.isUpdate) {
+                    resetFormToNewMode();
+                } else {
+                    resetForm();
+                }
+            } else {
+                alert(`Error: ${result.message}`);
             }
-
-            const printingData = {
-                description: formattedDescription,
-                quantity: qty,
-                totalPrice: totalPrice,
-                formData: collectFormData(),
-                originalRowNumber: isEditMode ? originalRowNumber : null
-            };
-
-            const addToProjectBtn = document.getElementById('add-to-project-btn');
-            addToProjectBtn.disabled = true;
-            const originalButtonText = addToProjectBtn.textContent;
-            addToProjectBtn.textContent = isEditMode ? 'Updating...' : 'Adding...';
-            addToProjectBtn.classList.add('opacity-50');
-
-            google.script.run
-                .withSuccessHandler(function(result) {
-                    if (result.success) {
-                        if (result.isUpdate) {
-                            resetFormToNewMode();
-                        } else {
-                            resetForm();
-                        }
-                    } else {
-                        alert(`Error: ${result.message}`);
-                    }
-                })
-                .withFailureHandler(function(error) {
-                    console.error('Error adding to project:', error);
-                    alert('An error occurred. Please try again.');
-                })
-                .withFinally(() => {
-                    addToProjectBtn.disabled = false;
-                    addToProjectBtn.textContent = originalButtonText;
-                    addToProjectBtn.classList.remove('opacity-50');
-                })
-                .addPrintingToProject(printingData);
+        })
+        .withFailureHandler(function(error) {
+            addToProjectBtn.disabled = false;
+            addToProjectBtn.textContent = originalButtonText;
+            addToProjectBtn.classList.remove('opacity-50');
+            
+            console.error('Error adding to project:', error);
+            alert('An error occurred while adding to the project. Please try again.');
+        })
+        .addPrintingToProject(printingData);
         }
         
         // --- DOM Initialization ---
