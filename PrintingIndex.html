@@ -40,17 +40,17 @@
     <div class="w-full max-w-2xl shadow-lg rounded-lg overflow-hidden bg-white">
         <div class="flex">
             <!-- Main Content -->
-            <div class="flex-grow p-6">
+            <div id="main-panel" class="flex-grow p-6">
                 <h1 class="text-xl font-semibold text-gray-800 mb-6">Printing Cost Calculator</h1>
 
                 <!-- Description and Quantity Section -->
                 <div class="grid grid-cols-12 gap-x-2 mb-6 items-start">
                     <div class="col-span-8">
-                        <label class="text-xs font-medium text-gray-600 block text-left">Description</label>
+                        <label for="description" class="text-xs font-medium text-gray-600 block text-left">Description</label>
                         <textarea id="description" class="mt-1 block w-full px-2 py-1 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-xs" rows="3"></textarea>
                     </div>
                     <div class="col-span-4">
-                        <label class="text-xs font-medium text-gray-600 block text-left">Quantity</label>
+                        <label for="quantity" class="text-xs font-medium text-gray-600 block text-left">Quantity</label>
                         <input id="quantity" type="number" min="1" value="1" class="mt-1 block w-full px-2 py-1 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-xs h-7" />
                     </div>
                 </div>
@@ -151,8 +151,8 @@
                         <div class="flex gap-x-2">
                             <input type="number" id="design-labor-quantity" class="w-20 px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm" placeholder="0" min="0" step="0.1" />
                             <select id="design-labor-unit" class="px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm">
-                                <option value="hours">Hours</option>
-                                <option value="minutes">Minutes</option>
+                                <option value="Hours">Hours</option>
+                                <option value="Minutes">Minutes</option>
                             </select>
                         </div>
                     </div>
@@ -172,8 +172,8 @@
                         <div class="flex gap-x-2">
                             <input type="number" id="decals-labor-quantity" class="w-20 px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm" placeholder="0" min="0" step="0.1" />
                             <select id="decals-labor-unit" class="px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm">
-                                <option value="hours">Hours</option>
-                                <option value="minutes">Minutes</option>
+                                <option value="Hours">Hours</option>
+                                <option value="Minutes">Minutes</option>
                             </select>
                         </div>
                     </div>
@@ -193,8 +193,8 @@
                         <div class="flex gap-x-2">
                             <input type="number" id="finishing-labor-quantity" class="w-20 px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm" placeholder="0" min="0" step="0.1" />
                             <select id="finishing-labor-unit" class="px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm">
-                                <option value="hours">Hours</option>
-                                <option value="minutes">Minutes</option>
+                                <option value="Hours">Hours</option>
+                                <option value="Minutes">Minutes</option>
                             </select>
                         </div>
                     </div>
@@ -214,8 +214,8 @@
                         <div class="flex gap-x-2">
                             <input type="number" id="installing-labor-quantity" class="w-20 px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm" placeholder="0" min="0" step="0.1" />
                             <select id="installing-labor-unit" class="px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm">
-                                <option value="hours">Hours</option>
-                                <option value="minutes">Minutes</option>
+                                <option value="Hours">Hours</option>
+                                <option value="Minutes">Minutes</option>
                             </select>
                         </div>
                     </div>
@@ -225,396 +225,250 @@
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // === GLOBAL VARIABLES ===
-            let isEditMode = false;
-            let originalRowNumber = null;
-            
-            // === State Management ===
-            const state = {
-                materials: [], materialName: '', description: '', quantity: 1, width: '', height: '',
-                complexShape: false, doubleSided: false, lamination: false,
-                designTime: '', laborDecalsTime: '', laborFinishingTime: '', laborInstallingTime: '',
-                designTimeUnit: 'Minutes', laborDecalsTimeUnit: 'Minutes', laborFinishingTimeUnit: 'Minutes', laborInstallingTimeUnit: 'Minutes',
-                margin: 60, isDrawerOpen: false,
-            };
+        // --- State Management ---
+        const state = {
+            materials: [], materialName: '', description: '', quantity: 1, width: '', height: '',
+            complexShape: false, doubleSided: false, lamination: false,
+            designTime: '', laborDecalsTime: '', laborFinishingTime: '', laborInstallingTime: '',
+            designTimeUnit: 'Minutes', laborDecalsTimeUnit: 'Minutes', laborFinishingTimeUnit: 'Minutes', laborInstallingTimeUnit: 'Minutes',
+            margin: 60, isDrawerOpen: false,
+        };
+        let isEditMode = false;
+        let originalRowNumber = null;
 
-            // === DOM ELEMENTS ===
-            const drawer = document.getElementById('advanced-drawer');
-            const drawerTrigger = document.getElementById('drawer-trigger');
-            const closeDrawerBtn = document.getElementById('close-drawer-btn');
-            const resetBtn = document.getElementById('reset-btn');
-            const addToProjectBtn = document.getElementById('add-to-project-btn');
+        // --- Helper Functions ---
+        const formatCurrency = (value) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(isNaN(value) ? 0 : value);
+        const getTimeInHours = (time, unit) => {
+            const numTime = Number(time) || 0;
+            return unit === 'Minutes' ? numTime / 60 : numTime;
+        };
 
-            // === EDIT MODE INITIALIZATION ===
-            if (window.editFormData) {
-                isEditMode = true;
-                originalRowNumber = window.editFormData.originalRowNumber;
-                
-                addToProjectBtn.textContent = 'Update Project';
-                document.querySelector('h1').textContent = 'Edit Printing Cost Calculator';
-                
-                setTimeout(() => populateFormData(window.editFormData), 100);
+        // --- Calculation Logic (from Alpha App) ---
+        function calculateEstimate() {
+            const errorMessageDiv = document.getElementById('error-message');
+            errorMessageDiv.textContent = '';
+            errorMessageDiv.classList.add('hidden');
+
+            const selectedMaterial = state.materials.find(m => m.name === state.materialName);
+
+            if (!selectedMaterial || !state.quantity || !state.width || !state.height) {
+                resetCostsUI();
+                return;
             }
+            
+            const qty = Number(state.quantity) || 0;
+            const artWidth = Number(state.width) || 0;
+            const artHeight = Number(state.height) || 0;
+            const bleed = 0.25;
+            const spacing = 0.25;
+            const artWidthTotal = artWidth + bleed;
+            const artHeightTotal = artHeight + bleed;
 
-            // === Helper Functions ===
-            const formatCurrency = (value) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(isNaN(value) ? 0 : value);
-            const getTimeInHours = (time, unit) => {
-                const numTime = Number(time) || 0;
-                return unit === 'Minutes' ? numTime / 60 : numTime;
-            };
+            let materialCost = 0;
+            let totalLinearFeet = 0;
 
-            // === Calculation Logic ===
-            function calculateEstimate() {
-                const errorMessageDiv = document.getElementById('error-message');
-                errorMessageDiv.textContent = '';
-                errorMessageDiv.classList.add('hidden');
-
-                const selectedMaterial = state.materials.find(m => m.name === state.materialName);
-
-                if (!selectedMaterial || !state.quantity || !state.width || !state.height) {
+            if (selectedMaterial.type === 'ROLL') {
+                const rollWidth = selectedMaterial.width;
+                if (artWidthTotal > rollWidth && artHeightTotal > rollWidth) {
+                    errorMessageDiv.textContent = 'Artwork is wider than the selected roll.';
+                    errorMessageDiv.classList.remove('hidden');
                     resetCostsUI();
                     return;
                 }
-                
-                const qty = Number(state.quantity) || 0;
-                const artWidth = Number(state.width) || 0;
-                const artHeight = Number(state.height) || 0;
-                const bleed = 0.25;
-                const spacing = 0.25;
-                const artWidthTotal = artWidth + bleed;
-                const artHeightTotal = artHeight + bleed;
-
-                let materialCost = 0;
-                let totalLinearFeet = 0;
-
-                if (selectedMaterial.type === 'ROLL') {
-                    const rollWidth = selectedMaterial.width;
-                    if (artWidthTotal > rollWidth && artHeightTotal > rollWidth) {
-                        errorMessageDiv.textContent = 'Artwork is wider than the selected roll.';
-                        errorMessageDiv.classList.remove('hidden');
-                        resetCostsUI();
-                        return;
-                    }
-                    const linFtCost = selectedMaterial.costLinFt;
-                    const colsPortrait = Math.floor((rollWidth + spacing) / (artWidthTotal + spacing));
-                    const colsLandscape = Math.floor((rollWidth + spacing) / (artHeightTotal + spacing));
-                    let numColumns = Math.max(colsPortrait, colsLandscape, 1);
-                    let layoutRow = artHeightTotal;
-                    if (colsLandscape > colsPortrait) layoutRow = artWidthTotal;
-                    const numRows = Math.ceil(qty / numColumns);
-                    const totalLinearInches = (numRows * layoutRow) + ((numRows - 1) * spacing);
-                    totalLinearFeet = totalLinearInches / 12;
-                    materialCost = (totalLinearFeet + 2.5) * linFtCost;
-                } else if (selectedMaterial.type === 'SHEET') {
-                    const sheetWidth = selectedMaterial.width;
-                    const sheetHeight = selectedMaterial.height;
-                    const artFitsPortrait = (artWidthTotal <= sheetWidth && artHeightTotal <= sheetHeight);
-                    const artFitsLandscape = (artWidthTotal <= sheetHeight && artHeightTotal <= sheetWidth);
-                    if (!artFitsPortrait && !artFitsLandscape) {
-                        errorMessageDiv.textContent = 'Artwork is larger than the selected sheet.';
-                        errorMessageDiv.classList.remove('hidden');
-                        resetCostsUI();
-                        return;
-                    }
-                    const sheetCost = selectedMaterial.costSheet;
-                    const perSheet1 = artFitsPortrait ? Math.floor((sheetWidth + spacing) / (artWidthTotal + spacing)) * Math.floor((sheetHeight + spacing) / (artHeightTotal + spacing)) : 0;
-                    const perSheet2 = artFitsLandscape ? Math.floor((sheetWidth + spacing) / (artHeightTotal + spacing)) * Math.floor((sheetHeight + spacing) / (artWidthTotal + spacing)) : 0;
-                    const piecesPerSheet = Math.max(perSheet1, perSheet2, 1);
-                    const totalSheets = Math.ceil(qty / piecesPerSheet);
-                    let calculatedMaterialCost = totalSheets * sheetCost;
-                    const halfSheetCost = sheetCost * 0.5;
-                    materialCost = Math.max(calculatedMaterialCost, halfSheetCost);
-                }
-
-                const singlePieceSqFt = (artWidthTotal * artHeightTotal) / 144;
-                let totalArtworkSqFt = singlePieceSqFt * qty;
-                if (state.doubleSided) totalArtworkSqFt *= 2;
-                const totalArtworkPerimeter = (artWidth * 2 + artHeight * 2) * qty;
-                const printTimeHours = (totalArtworkSqFt / 0.83) / 60;
-                let cutTimeHours = (totalArtworkPerimeter / 120) / 60;
-                if (state.complexShape) cutTimeHours *= 1.5;
-                const ripTimeHours = (totalArtworkSqFt / 20.52) / 60;
-                const printComputeTimeHours = (totalArtworkSqFt / 6.2) / 60;
-                const designTimeInHours = getTimeInHours(state.designTime, state.designTimeUnit);
-                const laborDecalsTimeInHours = getTimeInHours(state.laborDecalsTime, state.laborDecalsTimeUnit);
-                const laborFinishingTimeInHours = getTimeInHours(state.laborFinishingTime, state.laborFinishingTimeUnit);
-                const laborInstallingTimeInHours = getTimeInHours(state.laborInstallingTime, state.laborInstallingTimeUnit);
-                const manualOperatorTimeInHours = laborDecalsTimeInHours + laborFinishingTimeInHours + laborInstallingTimeInHours;
-                const totalProjectRunTimeHours = printTimeHours + cutTimeHours + ripTimeHours + printComputeTimeHours;
-                const inkCost = totalArtworkSqFt * 0.165;
-                const cuttingCost = cutTimeHours * 25.00;
-                const baseDesignCost = (totalArtworkSqFt / 25) * 0.0625 * 60.00;
-                const manualDesignCost = designTimeInHours * 60.00;
-                const designCost = baseDesignCost + manualDesignCost;
-                let laminationCost = 0;
-                if (state.lamination) {
-                    if (selectedMaterial.type === 'ROLL') laminationCost = totalLinearFeet * 1.02;
-                    else laminationCost = totalArtworkSqFt * 0.2267;
-                }
-                const equipmentCost = totalProjectRunTimeHours * 4.95;
-                const operatorCost = (totalProjectRunTimeHours + manualOperatorTimeInHours) * 28.00;
-                const calculatedTotalCosts = materialCost + inkCost + cuttingCost + designCost + equipmentCost + operatorCost + laminationCost;
-                const numMargin = Number(state.margin) || 0;
-                let calculatedTotalPrice = calculatedTotalCosts;
-                if (numMargin < 100 && numMargin >= 0) calculatedTotalPrice = calculatedTotalCosts / (1 - (numMargin / 100));
-                const calculatedUnitPrice = qty > 0 ? calculatedTotalPrice / qty : 0;
-
-                updateCostsUI(calculatedTotalCosts, calculatedTotalPrice, calculatedUnitPrice);
-            }
-
-            // === UI Update Functions ===
-            function updateCostsUI(total, price, unit) {
-                document.getElementById('total-cost').textContent = formatCurrency(total);
-                document.getElementById('total-price').textContent = formatCurrency(price);
-                document.getElementById('unit-price').textContent = formatCurrency(unit);
-            }
-
-            function resetCostsUI() {
-                updateCostsUI(0, 0, 0);
-            }
-
-            function resetForm() {
-                Object.assign(state, {
-                    description: '', materialName: '', quantity: 1, width: '', height: '',
-                    complexShape: false, doubleSided: false, lamination: false,
-                    designTime: '', laborDecalsTime: '', laborFinishingTime: '', laborInstallingTime: '',
-                    designTimeUnit: 'Minutes', laborDecalsTimeUnit: 'Minutes', laborFinishingTimeUnit: 'Minutes', laborInstallingTimeUnit: 'Minutes',
-                    margin: 60, isDrawerOpen: false,
-                });
-                document.getElementById('description').value = '';
-                document.getElementById('material').value = '';
-                document.getElementById('quantity').value = '1';
-                document.getElementById('width').value = '';
-                document.getElementById('height').value = '';
-                document.getElementById('margin').value = '60';
-                document.getElementById('complexShape').checked = false;
-                document.getElementById('doubleSided').checked = false;
-                document.getElementById('lamination').checked = false;
-                
-                // Reset advanced options
-                document.getElementById('design-labor-checkbox').checked = false;
-                document.getElementById('decals-labor-checkbox').checked = false;
-                document.getElementById('finishing-labor-checkbox').checked = false;
-                document.getElementById('installing-labor-checkbox').checked = false;
-                
-                document.getElementById('design-labor-inputs').classList.add('hidden');
-                document.getElementById('decals-labor-inputs').classList.add('hidden');
-                document.getElementById('finishing-labor-inputs').classList.add('hidden');
-                document.getElementById('installing-labor-inputs').classList.add('hidden');
-                
-                document.getElementById('design-labor-quantity').value = '';
-                document.getElementById('decals-labor-quantity').value = '';
-                document.getElementById('finishing-labor-quantity').value = '';
-                document.getElementById('installing-labor-quantity').value = '';
-                
-                document.getElementById('design-labor-unit').value = 'hours';
-                document.getElementById('decals-labor-unit').value = 'hours';
-                document.getElementById('finishing-labor-unit').value = 'hours';
-                document.getElementById('installing-labor-unit').value = 'hours';
-                
-                calculateEstimate();
-            }
-
-            function sendDataToProject() {
-                const description = state.description || 'Description Details';
-                const width = Number(state.width) || 0;
-                const height = Number(state.height) || 0;
-                const formattedDescription = `${description} - (${width}" x ${height}")`;
-
-                const qty = Number(state.quantity) || 0;
-                const priceText = document.getElementById('total-price').textContent;
-                const totalPrice = parseFloat(priceText.replace(/[^0-9.-]+/g,""));
-                const unitPrice = qty > 0 ? totalPrice / qty : 0;
-                if (isNaN(qty) || isNaN(unitPrice) || isNaN(totalPrice) || qty === 0) {
-                    alert("Please enter a valid quantity before adding to the project.");
+                const linFtCost = selectedMaterial.costLinFt;
+                const colsPortrait = Math.floor((rollWidth + spacing) / (artWidthTotal + spacing));
+                const colsLandscape = Math.floor((rollWidth + spacing) / (artHeightTotal + spacing));
+                let numColumns = Math.max(colsPortrait, colsLandscape, 1);
+                let layoutRow = artHeightTotal;
+                if (colsLandscape > colsPortrait) layoutRow = artWidthTotal;
+                const numRows = Math.ceil(qty / numColumns);
+                const totalLinearInches = (numRows * layoutRow) + ((numRows - 1) * spacing);
+                totalLinearFeet = totalLinearInches / 12;
+                materialCost = (totalLinearFeet + 2.5) * linFtCost;
+            } else if (selectedMaterial.type === 'SHEET') {
+                const sheetWidth = selectedMaterial.width;
+                const sheetHeight = selectedMaterial.height;
+                const artFitsPortrait = (artWidthTotal <= sheetWidth && artHeightTotal <= sheetHeight);
+                const artFitsLandscape = (artWidthTotal <= sheetHeight && artHeightTotal <= sheetWidth);
+                if (!artFitsPortrait && !artFitsLandscape) {
+                    errorMessageDiv.textContent = 'Artwork is larger than the selected sheet.';
+                    errorMessageDiv.classList.remove('hidden');
+                    resetCostsUI();
                     return;
                 }
-                
-                // Collect complete form data
-                const completeFormData = collectFormData();
-                
-                const printingData = {
-                    description: formattedDescription,
-                    quantity: qty,
-                    totalPrice: totalPrice,
-                    formData: completeFormData,
-                    originalRowNumber: isEditMode ? originalRowNumber : null
-                };
-                
-                addToProjectBtn.disabled = true;
-                const originalButtonText = addToProjectBtn.textContent;
-                addToProjectBtn.textContent = isEditMode ? 'Updating...' : 'Adding...';
-                addToProjectBtn.classList.add('opacity-50');
-                
-                google.script.run
-                    .withSuccessHandler(function(result) {
-                        addToProjectBtn.disabled = false;
-                        addToProjectBtn.textContent = originalButtonText;
-                        addToProjectBtn.classList.remove('opacity-50');
-                        
-                        if (result.success) {
-                            if (result.isUpdate) {
-                                resetFormToNewMode();
-                            } else {
-                                resetForm();
-                            }
-                        } else {
-                            alert(`Error: ${result.message}`);
-                        }
-                    })
-                    .withFailureHandler(function(error) {
-                        addToProjectBtn.disabled = false;
-                        addToProjectBtn.textContent = originalButtonText;
-                        addToProjectBtn.classList.remove('opacity-50');
-                        
-                        console.error('Error adding to project:', error);
-                        alert('An error occurred while adding to the project. Please try again.');
-                    })
-                    .addPrintingToProject(printingData);
+                const sheetCost = selectedMaterial.costSheet;
+                const perSheet1 = artFitsPortrait ? Math.floor((sheetWidth + spacing) / (artWidthTotal + spacing)) * Math.floor((sheetHeight + spacing) / (artHeightTotal + spacing)) : 0;
+                const perSheet2 = artFitsLandscape ? Math.floor((sheetWidth + spacing) / (artHeightTotal + spacing)) * Math.floor((sheetHeight + spacing) / (artWidthTotal + spacing)) : 0;
+                const piecesPerSheet = Math.max(perSheet1, perSheet2, 1);
+                const totalSheets = Math.ceil(qty / piecesPerSheet);
+                let calculatedMaterialCost = totalSheets * sheetCost;
+                const halfSheetCost = sheetCost * 0.5;
+                materialCost = Math.max(calculatedMaterialCost, halfSheetCost);
             }
 
-            function collectFormData() {
-                const formData = {
-                    description: state.description,
-                    materialName: state.materialName,
-                    quantity: state.quantity,
-                    width: state.width,
-                    height: state.height,
-                    complexShape: state.complexShape,
-                    doubleSided: state.doubleSided,
-                    lamination: state.lamination,
-                    designTime: state.designTime,
-                    laborDecalsTime: state.laborDecalsTime,
-                    laborFinishingTime: state.laborFinishingTime,
-                    laborInstallingTime: state.laborInstallingTime,
-                    designTimeUnit: state.designTimeUnit,
-                    laborDecalsTimeUnit: state.laborDecalsTimeUnit,
-                    laborFinishingTimeUnit: state.laborFinishingTimeUnit,
-                    laborInstallingTimeUnit: state.laborInstallingTimeUnit,
-                    margin: state.margin
-                };
-
-                if (isEditMode && originalRowNumber) {
-                    formData.originalRowNumber = originalRowNumber;
-                }
-
-                return formData;
+            const singlePieceSqFt = (artWidthTotal * artHeightTotal) / 144;
+            let totalArtworkSqFt = singlePieceSqFt * qty;
+            if (state.doubleSided) totalArtworkSqFt *= 2;
+            const totalArtworkPerimeter = (artWidth * 2 + artHeight * 2) * qty;
+            const printTimeHours = (totalArtworkSqFt / 0.83) / 60;
+            let cutTimeHours = (totalArtworkPerimeter / 120) / 60;
+            if (state.complexShape) cutTimeHours *= 1.5;
+            const ripTimeHours = (totalArtworkSqFt / 20.52) / 60;
+            const printComputeTimeHours = (totalArtworkSqFt / 6.2) / 60;
+            const designTimeInHours = getTimeInHours(state.designTime, state.designTimeUnit);
+            const laborDecalsTimeInHours = getTimeInHours(state.laborDecalsTime, state.laborDecalsTimeUnit);
+            const laborFinishingTimeInHours = getTimeInHours(state.laborFinishingTime, state.laborFinishingTimeUnit);
+            const laborInstallingTimeInHours = getTimeInHours(state.laborInstallingTime, state.laborInstallingTimeUnit);
+            const manualOperatorTimeInHours = laborDecalsTimeInHours + laborFinishingTimeInHours + laborInstallingTimeInHours;
+            const totalProjectRunTimeHours = printTimeHours + cutTimeHours + ripTimeHours + printComputeTimeHours;
+            const inkCost = totalArtworkSqFt * 0.165;
+            const cuttingCost = cutTimeHours * 25.00;
+            const baseDesignCost = (totalArtworkSqFt / 25) * 0.0625 * 60.00;
+            const manualDesignCost = designTimeInHours * 60.00;
+            const designCost = baseDesignCost + manualDesignCost;
+            let laminationCost = 0;
+            if (state.lamination) {
+                if (selectedMaterial.type === 'ROLL') laminationCost = totalLinearFeet * 1.02;
+                else laminationCost = totalArtworkSqFt * 0.2267;
             }
+            const equipmentCost = totalProjectRunTimeHours * 4.95;
+            const operatorCost = (totalProjectRunTimeHours + manualOperatorTimeInHours) * 28.00;
+            const calculatedTotalCosts = materialCost + inkCost + cuttingCost + designCost + equipmentCost + operatorCost + laminationCost;
+            const numMargin = Number(state.margin) || 0;
+            let calculatedTotalPrice = calculatedTotalCosts;
+            if (numMargin < 100 && numMargin >= 0) calculatedTotalPrice = calculatedTotalCosts / (1 - (numMargin / 100));
+            const calculatedUnitPrice = qty > 0 ? calculatedTotalPrice / qty : 0;
 
-            function populateFormData(formData) {
-                if (!formData) return;
+            updateCostsUI(calculatedTotalCosts, calculatedTotalPrice, calculatedUnitPrice);
+        }
 
-                if (formData.originalRowNumber) {
-                    isEditMode = true;
-                    originalRowNumber = formData.originalRowNumber;
-                    
-                    addToProjectBtn.textContent = 'Update Project';
-                    document.querySelector('h1').textContent = 'Edit Printing Cost Calculator';
-                }
+        // --- UI Update Functions ---
+        function updateCostsUI(total, price, unit) {
+            document.getElementById('total-cost').textContent = formatCurrency(total);
+            document.getElementById('total-price').textContent = formatCurrency(price);
+            document.getElementById('unit-price').textContent = formatCurrency(unit);
+        }
 
-                if (formData.description) document.getElementById('description').value = formData.description;
-                if (formData.materialName) {
-                    state.materialName = formData.materialName;
-                    document.getElementById('material').value = formData.materialName;
-                }
-                if (formData.quantity) {
-                    state.quantity = formData.quantity;
-                    document.getElementById('quantity').value = formData.quantity;
-                }
-                if (formData.width) {
-                    state.width = formData.width;
-                    document.getElementById('width').value = formData.width;
-                }
-                if (formData.height) {
-                    state.height = formData.height;
-                    document.getElementById('height').value = formData.height;
-                }
-                if (formData.margin !== undefined) {
-                    state.margin = formData.margin;
-                    document.getElementById('margin').value = formData.margin;
-                }
+        function resetCostsUI() {
+            updateCostsUI(0, 0, 0);
+        }
 
-                if (formData.complexShape) {
-                    state.complexShape = true;
-                    document.getElementById('complexShape').checked = true;
-                }
-                if (formData.doubleSided) {
-                    state.doubleSided = true;
-                    document.getElementById('doubleSided').checked = true;
-                }
-                if (formData.lamination) {
-                    state.lamination = true;
-                    document.getElementById('lamination').checked = true;
-                }
-
-                // Advanced labor options
-                if (formData.designTime) {
-                    state.designTime = formData.designTime;
-                    document.getElementById('design-labor-checkbox').checked = true;
-                    document.getElementById('design-labor-inputs').classList.remove('hidden');
-                    document.getElementById('design-labor-quantity').value = formData.designTime;
-                    document.getElementById('design-labor-unit').value = formData.designTimeUnit === 'Minutes' ? 'minutes' : 'hours';
-                }
-                if (formData.laborDecalsTime) {
-                    state.laborDecalsTime = formData.laborDecalsTime;
-                    document.getElementById('decals-labor-checkbox').checked = true;
-                    document.getElementById('decals-labor-inputs').classList.remove('hidden');
-                    document.getElementById('decals-labor-quantity').value = formData.laborDecalsTime;
-                    document.getElementById('decals-labor-unit').value = formData.laborDecalsTimeUnit === 'Minutes' ? 'minutes' : 'hours';
-                }
-                if (formData.laborFinishingTime) {
-                    state.laborFinishingTime = formData.laborFinishingTime;
-                    document.getElementById('finishing-labor-checkbox').checked = true;
-                    document.getElementById('finishing-labor-inputs').classList.remove('hidden');
-                    document.getElementById('finishing-labor-quantity').value = formData.laborFinishingTime;
-                    document.getElementById('finishing-labor-unit').value = formData.laborFinishingTimeUnit === 'Minutes' ? 'minutes' : 'hours';
-                }
-                if (formData.laborInstallingTime) {
-                    state.laborInstallingTime = formData.laborInstallingTime;
-                    document.getElementById('installing-labor-checkbox').checked = true;
-                    document.getElementById('installing-labor-inputs').classList.remove('hidden');
-                    document.getElementById('installing-labor-quantity').value = formData.laborInstallingTime;
-                    document.getElementById('installing-labor-unit').value = formData.laborInstallingTimeUnit === 'Minutes' ? 'minutes' : 'hours';
-                }
-
-                setTimeout(calculateEstimate, 100);
-            }
-
-            function resetFormToNewMode() {
-                resetForm();
-                isEditMode = false;
-                originalRowNumber = null;
-                addToProjectBtn.textContent = 'Add to Project';
-                document.querySelector('h1').textContent = 'Printing Cost Calculator';
-            }
+        function resetForm() {
+            Object.assign(state, {
+                description: '', materialName: '', quantity: 1, width: '', height: '',
+                complexShape: false, doubleSided: false, lamination: false,
+                designTime: '', laborDecalsTime: '', laborFinishingTime: '', laborInstallingTime: '',
+                designTimeUnit: 'Minutes', laborDecalsTimeUnit: 'Minutes', laborFinishingTimeUnit: 'Minutes', laborInstallingTimeUnit: 'Minutes',
+                margin: 60,
+            });
+            document.getElementById('description').value = '';
+            document.getElementById('material').value = '';
+            document.getElementById('quantity').value = '1';
+            document.getElementById('width').value = '';
+            document.getElementById('height').value = '';
+            document.getElementById('margin').value = '60';
             
-            // === DOM Initialization ===
+            ['complexShape', 'doubleSided', 'lamination'].forEach(id => document.getElementById(id).checked = false);
+            
+            // Reset advanced options
+            const advancedFields = ['design', 'decals', 'finishing', 'installing'];
+            advancedFields.forEach(field => {
+                document.getElementById(`${field}-labor-checkbox`).checked = false;
+                document.getElementById(`${field}-labor-inputs`).classList.add('hidden');
+                document.getElementById(`${field}-labor-quantity`).value = '';
+                document.getElementById(`${field}-labor-unit`).value = 'Hours';
+            });
+            
+            calculateEstimate();
+        }
+
+        function collectFormData() {
+            const formData = { ...state };
+            if (isEditMode && originalRowNumber) {
+                formData.originalRowNumber = originalRowNumber;
+            }
+            return formData;
+        }
+
+        function sendDataToProject() {
+            const description = state.description || 'Description Details';
+            const width = Number(state.width) || 0;
+            const height = Number(state.height) || 0;
+            const formattedDescription = `${description} - (${width}" x ${height}")`;
+
+            const qty = Number(state.quantity) || 0;
+            const priceText = document.getElementById('total-price').textContent;
+            const totalPrice = parseFloat(priceText.replace(/[^0-9.-]+/g,""));
+            
+            if (isNaN(qty) || qty <= 0 || isNaN(totalPrice)) {
+                alert("Please ensure quantity and all required fields are filled out correctly.");
+                return;
+            }
+
+            const printingData = {
+                description: formattedDescription,
+                quantity: qty,
+                totalPrice: totalPrice,
+                formData: collectFormData(),
+                originalRowNumber: isEditMode ? originalRowNumber : null
+            };
+
+            const addToProjectBtn = document.getElementById('add-to-project-btn');
+            addToProjectBtn.disabled = true;
+            const originalButtonText = addToProjectBtn.textContent;
+            addToProjectBtn.textContent = isEditMode ? 'Updating...' : 'Adding...';
+            addToProjectBtn.classList.add('opacity-50');
+
+            google.script.run
+                .withSuccessHandler(function(result) {
+                    if (result.success) {
+                        if (result.isUpdate) {
+                            resetFormToNewMode();
+                        } else {
+                            resetForm();
+                        }
+                    } else {
+                        alert(`Error: ${result.message}`);
+                    }
+                })
+                .withFailureHandler(function(error) {
+                    console.error('Error adding to project:', error);
+                    alert('An error occurred. Please try again.');
+                })
+                .withFinally(() => {
+                    addToProjectBtn.disabled = false;
+                    addToProjectBtn.textContent = originalButtonText;
+                    addToProjectBtn.classList.remove('opacity-50');
+                })
+                .addPrintingToProject(printingData);
+        }
+        
+        // --- DOM Initialization ---
+        document.addEventListener('DOMContentLoaded', () => {
+             // Check for edit mode data passed from Code.gs
+            if (window.editFormData) {
+                isEditMode = true;
+                originalRowNumber = window.editFormData.originalRowNumber;
+                document.getElementById('add-to-project-btn').textContent = 'Update Project';
+                document.querySelector('h1').textContent = 'Edit Printing Cost';
+            }
+
             google.script.run.withSuccessHandler(materials => {
-                console.log('Materials received:', materials);
                 state.materials = materials.map(m => ({
                     name: m[0], type: m[1], width: parseFloat(m[2]), height: parseFloat(m[3]), costSheet: parseFloat(m[4]), costLinFt: parseFloat(m[5])
                 }));
                 const materialSelect = document.getElementById('material');
-                
-                // Clear existing options
                 materialSelect.innerHTML = '<option value="">Select Material</option>';
-                
                 state.materials.forEach(m => {
                     const option = document.createElement('option');
                     option.value = m.name;
                     option.textContent = m.name;
                     materialSelect.appendChild(option);
                 });
-                
-                // If in edit mode, populate after materials are loaded
-                if (window.editFormData) {
-                    setTimeout(() => populateFormData(window.editFormData), 200);
+                 // If in edit mode, populate form after materials are loaded
+                if (isEditMode) {
+                    populateFormData(window.editFormData);
                 }
-            }).withFailureHandler(error => {
-                console.error('Error loading materials:', error);
-                const materialSelect = document.getElementById('material');
-                materialSelect.innerHTML = '<option value="">Error loading materials</option>';
             }).getPrintingMaterials();
 
             // Setup all event listeners
@@ -623,65 +477,91 @@
             ['quantity', 'width', 'height', 'margin'].forEach(id => {
                 document.getElementById(id).addEventListener('input', (e) => { state[id] = e.target.value; calculateEstimate(); });
             });
-            
-            // Option checkboxes
-            document.getElementById('complexShape').addEventListener('change', (e) => { state.complexShape = e.target.checked; calculateEstimate(); });
-            document.getElementById('doubleSided').addEventListener('change', (e) => { state.doubleSided = e.target.checked; calculateEstimate(); });
-            document.getElementById('lamination').addEventListener('change', (e) => { state.lamination = e.target.checked; calculateEstimate(); });
-            
-            document.getElementById('reset-btn').addEventListener('click', resetForm);
+            ['complexShape', 'doubleSided', 'lamination'].forEach(id => {
+                document.getElementById(id).addEventListener('change', (e) => { state[id] = e.target.checked; calculateEstimate(); });
+            });
+            document.getElementById('reset-btn').addEventListener('click', isEditMode ? resetFormToNewMode : resetForm);
             document.getElementById('add-to-project-btn').addEventListener('click', sendDataToProject);
             
-            // Drawer functionality
-            if (drawerTrigger && drawer) {
-                drawerTrigger.addEventListener('click', function() {
-                    drawer.classList.remove('translate-x-full');
-                });
-            }
-            if (closeDrawerBtn && drawer) {
-                closeDrawerBtn.addEventListener('click', function() {
-                    drawer.classList.add('translate-x-full');
-                });
-            }
+            // Advanced Drawer
+            const drawer = document.getElementById('advanced-drawer');
+            const drawerTrigger = document.getElementById('drawer-trigger');
+            const closeDrawerBtn = document.getElementById('close-drawer-btn');
 
-            // Advanced labor checkboxes and inputs
-            const advancedLabor = [
+            const toggleDrawer = () => drawer.classList.toggle('translate-x-full');
+            drawerTrigger.addEventListener('click', toggleDrawer);
+            closeDrawerBtn.addEventListener('click', toggleDrawer);
+
+            // Advanced fields listeners
+            const advancedFields = [
                 { checkbox: 'design-labor-checkbox', inputs: 'design-labor-inputs', quantity: 'design-labor-quantity', unit: 'design-labor-unit', stateTime: 'designTime', stateUnit: 'designTimeUnit' },
                 { checkbox: 'decals-labor-checkbox', inputs: 'decals-labor-inputs', quantity: 'decals-labor-quantity', unit: 'decals-labor-unit', stateTime: 'laborDecalsTime', stateUnit: 'laborDecalsTimeUnit' },
                 { checkbox: 'finishing-labor-checkbox', inputs: 'finishing-labor-inputs', quantity: 'finishing-labor-quantity', unit: 'finishing-labor-unit', stateTime: 'laborFinishingTime', stateUnit: 'laborFinishingTimeUnit' },
                 { checkbox: 'installing-labor-checkbox', inputs: 'installing-labor-inputs', quantity: 'installing-labor-quantity', unit: 'installing-labor-unit', stateTime: 'laborInstallingTime', stateUnit: 'laborInstallingTimeUnit' }
             ];
-
-            advancedLabor.forEach(labor => {
-                const checkbox = document.getElementById(labor.checkbox);
-                const inputs = document.getElementById(labor.inputs);
-                const quantityInput = document.getElementById(labor.quantity);
-                const unitSelect = document.getElementById(labor.unit);
+            advancedFields.forEach(field => {
+                const checkbox = document.getElementById(field.checkbox);
+                const inputs = document.getElementById(field.inputs);
+                const quantityInput = document.getElementById(field.quantity);
+                const unitSelect = document.getElementById(field.unit);
 
                 checkbox.addEventListener('change', function() {
-                    if (this.checked) {
-                        inputs.classList.remove('hidden');
-                    } else {
-                        inputs.classList.add('hidden');
-                        state[labor.stateTime] = '';
+                    inputs.classList.toggle('hidden', !this.checked);
+                    if (!this.checked) {
+                        state[field.stateTime] = '';
                         quantityInput.value = '';
                     }
                     calculateEstimate();
                 });
+                quantityInput.addEventListener('input', (e) => { state[field.stateTime] = e.target.value; calculateEstimate(); });
+                unitSelect.addEventListener('change', (e) => { state[field.stateUnit] = e.target.value; calculateEstimate(); });
+            });
+        });
 
-                quantityInput.addEventListener('input', (e) => {
-                    state[labor.stateTime] = e.target.value;
-                    calculateEstimate();
-                });
-
-                unitSelect.addEventListener('change', (e) => {
-                    state[labor.stateUnit] = e.target.value === 'minutes' ? 'Minutes' : 'Hours';
-                    calculateEstimate();
-                });
+        function populateFormData(formData) {
+            if (!formData) return;
+            // Restore state from formData
+            Object.assign(state, formData);
+            
+            // Update UI elements
+            document.getElementById('description').value = state.description || '';
+            document.getElementById('material').value = state.materialName || '';
+            document.getElementById('quantity').value = state.quantity || 1;
+            document.getElementById('width').value = state.width || '';
+            document.getElementById('height').value = state.height || '';
+            document.getElementById('margin').value = state.margin || 60;
+            
+            ['complexShape', 'doubleSided', 'lamination'].forEach(id => {
+                document.getElementById(id).checked = !!state[id];
+            });
+            
+            // Advanced options
+            const advancedFields = [
+                { checkbox: 'design-labor-checkbox', inputs: 'design-labor-inputs', quantity: 'design-labor-quantity', unit: 'design-labor-unit', stateTime: 'designTime', stateUnit: 'designTimeUnit' },
+                { checkbox: 'decals-labor-checkbox', inputs: 'decals-labor-inputs', quantity: 'decals-labor-quantity', unit: 'decals-labor-unit', stateTime: 'laborDecalsTime', stateUnit: 'laborDecalsTimeUnit' },
+                { checkbox: 'finishing-labor-checkbox', inputs: 'finishing-labor-inputs', quantity: 'finishing-labor-quantity', unit: 'finishing-labor-unit', stateTime: 'laborFinishingTime', stateUnit: 'laborFinishingTimeUnit' },
+                { checkbox: 'installing-labor-checkbox', inputs: 'installing-labor-inputs', quantity: 'installing-labor-quantity', unit: 'installing-labor-unit', stateTime: 'laborInstallingTime', stateUnit: 'laborInstallingTimeUnit' }
+            ];
+            advancedFields.forEach(field => {
+                if (state[field.stateTime]) {
+                    document.getElementById(field.checkbox).checked = true;
+                    document.getElementById(field.inputs).classList.remove('hidden');
+                    document.getElementById(field.quantity).value = state[field.stateTime];
+                    document.getElementById(field.unit).value = state[field.stateUnit];
+                }
             });
 
-            updateCostsUI(0, 0, 0);
-        });
+            setTimeout(calculateEstimate, 100);
+        }
+
+        function resetFormToNewMode() {
+            resetForm();
+            isEditMode = false;
+            originalRowNumber = null;
+            document.getElementById('add-to-project-btn').textContent = 'Add to Project';
+            document.querySelector('h1').textContent = 'Printing Cost Calculator';
+        }
+
     </script>
 </body>
 </html>
