@@ -43,15 +43,25 @@
             <div id="main-panel" class="flex-grow p-6">
                 <h1 class="text-xl font-semibold text-gray-800 mb-6">Printing Cost Calculator</h1>
 
-                <!-- Description and Quantity Section -->
-                <div class="grid grid-cols-12 gap-x-2 mb-6 items-start">
-                    <div class="col-span-8">
-                        <label for="description" class="text-xs font-medium text-gray-600 block text-left">Description</label>
-                        <textarea id="description" class="mt-1 block w-full px-2 py-1 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-xs" rows="3"></textarea>
-                    </div>
-                    <div class="col-span-4">
+                <!-- Description Section (Full Width) -->
+                <div class="mb-6">
+                    <label for="description" class="text-xs font-medium text-gray-600 block text-left">Description</label>
+                    <textarea id="description" class="mt-1 block w-full px-2 py-1 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-xs" rows="3"></textarea>
+                </div>
+
+                <!-- Quantity, Width, and Height Section -->
+                <div class="grid grid-cols-3 gap-x-4 mb-6">
+                    <div>
                         <label for="quantity" class="text-xs font-medium text-gray-600 block text-left">Quantity</label>
                         <input id="quantity" type="number" min="1" value="1" class="mt-1 block w-full px-2 py-1 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-xs h-7" />
+                    </div>
+                    <div>
+                        <label for="width" class="text-xs font-medium text-gray-600 block text-left">Width (inches)</label>
+                        <input id="width" type="number" step="0.1" class="mt-1 block w-full px-2 py-1 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-xs h-7" placeholder="0.0" />
+                    </div>
+                    <div>
+                        <label for="height" class="text-xs font-medium text-gray-600 block text-left">Height (inches)</label>
+                        <input id="height" type="number" step="0.1" class="mt-1 block w-full px-2 py-1 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-xs h-7" placeholder="0.0" />
                     </div>
                 </div>
 
@@ -62,18 +72,6 @@
                         <option value="">Select Material</option>
                     </select>
                     <div id="error-message" class="text-xs text-red-600 mt-1 hidden"></div>
-                </div>
-
-                <!-- Dimensions Section -->
-                <div class="grid grid-cols-2 gap-x-4 mb-6">
-                    <div>
-                        <label class="text-xs font-medium text-gray-600 block text-left">Width (inches)</label>
-                        <input id="width" type="number" step="0.1" class="mt-1 block w-full px-2 py-1 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-xs h-7" placeholder="0.0" />
-                    </div>
-                    <div>
-                        <label class="text-xs font-medium text-gray-600 block text-left">Height (inches)</label>
-                        <input id="height" type="number" step="0.1" class="mt-1 block w-full px-2 py-1 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-xs h-7" placeholder="0.0" />
-                    </div>
                 </div>
 
                 <!-- Options Section -->
@@ -256,6 +254,11 @@
                 return;
             }
             
+            console.log('=== DEBUG INFO ===');
+            console.log('Selected Material:', selectedMaterial);
+            console.log('Material costLinFt:', selectedMaterial.costLinFt);
+            console.log('Material costSheet:', selectedMaterial.costSheet);
+            
             const qty = Number(state.quantity) || 0;
             const artWidth = Number(state.width) || 0;
             const artHeight = Number(state.height) || 0;
@@ -276,6 +279,7 @@
                     return;
                 }
                 const linFtCost = selectedMaterial.costLinFt;
+                console.log('ROLL - linFtCost:', linFtCost);
                 const colsPortrait = Math.floor((rollWidth + spacing) / (artWidthTotal + spacing));
                 const colsLandscape = Math.floor((rollWidth + spacing) / (artHeightTotal + spacing));
                 let numColumns = Math.max(colsPortrait, colsLandscape, 1);
@@ -285,6 +289,8 @@
                 const totalLinearInches = (numRows * layoutRow) + ((numRows - 1) * spacing);
                 totalLinearFeet = totalLinearInches / 12;
                 materialCost = (totalLinearFeet + 2.5) * linFtCost;
+                console.log('ROLL - totalLinearFeet:', totalLinearFeet);
+                console.log('ROLL - materialCost:', materialCost);
             } else if (selectedMaterial.type === 'SHEET') {
                 const sheetWidth = selectedMaterial.width;
                 const sheetHeight = selectedMaterial.height;
@@ -297,6 +303,7 @@
                     return;
                 }
                 const sheetCost = selectedMaterial.costSheet;
+                console.log('SHEET - sheetCost:', sheetCost);
                 const perSheet1 = artFitsPortrait ? Math.floor((sheetWidth + spacing) / (artWidthTotal + spacing)) * Math.floor((sheetHeight + spacing) / (artHeightTotal + spacing)) : 0;
                 const perSheet2 = artFitsLandscape ? Math.floor((sheetWidth + spacing) / (artHeightTotal + spacing)) * Math.floor((sheetHeight + spacing) / (artWidthTotal + spacing)) : 0;
                 const piecesPerSheet = Math.max(perSheet1, perSheet2, 1);
@@ -304,6 +311,8 @@
                 let calculatedMaterialCost = totalSheets * sheetCost;
                 const halfSheetCost = sheetCost * 0.5;
                 materialCost = Math.max(calculatedMaterialCost, halfSheetCost);
+                console.log('SHEET - totalSheets:', totalSheets);
+                console.log('SHEET - materialCost:', materialCost);
             }
 
             const singlePieceSqFt = (artWidthTotal * artHeightTotal) / 144;
@@ -334,6 +343,17 @@
             const equipmentCost = totalProjectRunTimeHours * 4.95;
             const operatorCost = (totalProjectRunTimeHours + manualOperatorTimeInHours) * 28.00;
             const calculatedTotalCosts = materialCost + inkCost + cuttingCost + designCost + equipmentCost + operatorCost + laminationCost;
+            
+            console.log('Material Cost:', materialCost);
+            console.log('Ink Cost:', inkCost);
+            console.log('Cutting Cost:', cuttingCost);
+            console.log('Design Cost:', designCost);
+            console.log('Equipment Cost:', equipmentCost);
+            console.log('Operator Cost:', operatorCost);
+            console.log('Lamination Cost:', laminationCost);
+            console.log('Total Costs:', calculatedTotalCosts);
+            console.log('=== END DEBUG ===');
+            
             const numMargin = Number(state.margin) || 0;
             let calculatedTotalPrice = calculatedTotalCosts;
             if (numMargin < 100 && numMargin >= 0) calculatedTotalPrice = calculatedTotalCosts / (1 - (numMargin / 100));
@@ -454,9 +474,11 @@
             }
 
             google.script.run.withSuccessHandler(materials => {
+                console.log('Raw materials received:', materials);
                 state.materials = materials.map(m => ({
                     name: m[0], type: m[1], width: parseFloat(m[2]), height: parseFloat(m[3]), costSheet: parseFloat(m[4]), costLinFt: parseFloat(m[5])
                 }));
+                console.log('Processed materials:', state.materials);
                 const materialSelect = document.getElementById('material');
                 materialSelect.innerHTML = '<option value="">Select Material</option>';
                 state.materials.forEach(m => {
