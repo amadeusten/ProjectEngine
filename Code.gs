@@ -33,10 +33,10 @@ const materialsSheet = {
 
     if (category === 'PRINT') {
         return filteredValues.map(row => {
-            const name = row[1].toString().trim();
-            const type = row[2] ? row[2].toString().trim().toUpperCase() : 'SHEET';
-            const width = parseFloat(row[7]) || 0; // Column H
-            const length = parseFloat(row[8]) || 0; // Column I
+            const name = row[1].toString().trim(); // Column B
+            const type = row[6] ? row[6].toString().trim().toUpperCase() : 'SHEET'; // Column G (Material Type)
+            const width = parseFloat(row[7]) || 0; // Column H (inches)
+            const length = parseFloat(row[8]) || 0; // Column I (feet for ROLL, inches for SHEET)
             let sheetCost = row[9]; // Column J
 
             if (sheetCost && typeof sheetCost === 'string') {
@@ -46,9 +46,15 @@ const materialsSheet = {
                 sheetCost = 0;
             }
             
-            // The front-end now handles the linear foot cost calculation.
-            // We pass the raw data it needs: [name, type, width, length, unitCost]
-            return [name, type, width, length, sheetCost];
+            // Calculate linear foot cost for ROLL materials
+            // For ROLL: length is already in feet, so cost per linear foot = unit cost / length
+            let costLinFt = 0;
+            if (type === 'ROLL' && length > 0) {
+                costLinFt = sheetCost / length;
+            }
+            
+            // Return: [name, type, width, height, costSheet, costLinFt]
+            return [name, type, width, length, sheetCost, costLinFt];
         });
     } else { // 'FABRICATION' and default
         return filteredValues.map(row => {
