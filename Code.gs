@@ -5,12 +5,8 @@
 
 // An object to namespace all functions related to the "Materials" sheet.
 const materialsSheet = {
-  NAME: 'Materials', // The name of the sheet.
+  NAME: 'Materials',
 
-  /**
-   * Gets the 'Materials' sheet object from the active spreadsheet.
-   * @returns {GoogleAppsScript.Spreadsheet.Sheet|null} The sheet object or null if not found.
-   */
   getSheet: function() {
     const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
     const sheet = spreadsheet.getSheetByName(this.NAME);
@@ -20,39 +16,29 @@ const materialsSheet = {
     return sheet;
   },
 
-  /**
-   * Fetches and processes all material data from the sheet for the Fabrication App.
-   * @returns {Array<Object>} An array of objects, each with 'name' and 'unitCost' properties.
-   */
   getData: function() {
     const sheet = this.getSheet();
     if (!sheet) {
-      return []; // Return empty array if the sheet doesn't exist.
+      return [];
     }
-    // Get data from Column A to Column P to include all relevant fields from the new sheet.
     const range = sheet.getRange('A2:P' + sheet.getLastRow());
     const values = range.getValues();
     
-    // Process the data into an array of objects.
     return values
       .filter(row => {
-        const name = row[1]; // Column B: Material Name
-        const primaryCategory = row[4]; // Column E: Primary Category
-        // Ensure the row has a name and the category includes 'FABRICATION'.
+        const name = row[1];
+        const primaryCategory = row[4];
         return name && name.toString().trim() !== "" && primaryCategory && primaryCategory.toString().includes('FABRICATION');
       })
       .map(row => {
-        // Trim the name to prevent whitespace issues during lookup.
-        const name = row[1].toString().trim();     // Column B: Material Name
-        let unitCost = row[9]; // Column J: Unit Cost
+        const name = row[1].toString().trim();
+        let unitCost = row[9];
         
-        // Clean the unitCost value (e.g., from "$1,540.16" to 1540.16)
         if (unitCost && typeof unitCost === 'string') {
-          // Remove currency symbols, spaces, and commas, then convert to a number.
           const cleanedCost = parseFloat(unitCost.replace(/[^0-9.-]+/g,""));
           unitCost = isNaN(cleanedCost) ? 0 : cleanedCost;
         } else if (typeof unitCost !== 'number') {
-          unitCost = 0; // Default to 0 if it's not a number or a parsable string.
+          unitCost = 0;
         }
 
         return {
@@ -65,12 +51,8 @@ const materialsSheet = {
 
 // An object to namespace all functions related to the "Personnel" sheet.
 const personnelSheet = {
-  NAME: 'Personnel', // The name of the sheet.
+  NAME: 'Personnel',
 
-  /**
-   * Gets the 'Personnel' sheet object from the active spreadsheet.
-   * @returns {GoogleAppsScript.Spreadsheet.Sheet|null} The sheet object or null if not found.
-   */
   getSheet: function() {
     const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
     const sheet = spreadsheet.getSheetByName(this.NAME);
@@ -80,25 +62,19 @@ const personnelSheet = {
     return sheet;
   },
 
-  /**
-   * Fetches and processes all personnel data from the sheet.
-   * @returns {Array<Object>} An array of objects, each with 'name' and 'projectRate' properties.
-   */
   getData: function() {
     const sheet = this.getSheet();
     if (!sheet) {
-      return []; // Return empty array if the sheet doesn't exist.
+      return [];
     }
-    // Get data from Column B (Name) and Column C (ProjectRate).
     const range = sheet.getRange('B2:C' + sheet.getLastRow());
     const values = range.getValues();
     
-    // Process the data into an array of objects.
     return values
-      .filter(row => row[0] && row[0].toString().trim() !== "") // Filter out rows with no name.
+      .filter(row => row[0] && row[0].toString().trim() !== "")
       .map(row => {
-        const name = row[0].toString().trim(); // Column B: Name
-        let projectRate = row[1]; // Column C: ProjectRate
+        const name = row[0].toString().trim();
+        let projectRate = row[1];
 
         if (typeof projectRate !== 'number') {
           projectRate = parseFloat(projectRate) || 0;
@@ -114,9 +90,6 @@ const personnelSheet = {
 
 // An object to namespace all functions related to the fabrication application.
 const fabricationApp = {
-  /**
-   * Opens the modal dialog for the fabrication application.
-   */
   showDialog: function() {
     const htmlOutput = HtmlService.createHtmlOutputFromFile('FabricationIndex')
         .setWidth(750)
@@ -125,10 +98,6 @@ const fabricationApp = {
     ui.showModalDialog(htmlOutput, 'Fabrication Details');
   },
 
-  /**
-   * Gets materials data for the app.
-   * @returns {Array<Object>} An array of objects with material data.
-   */
   getMaterials: function() {
     try {
       return materialsSheet.getData();
@@ -138,10 +107,6 @@ const fabricationApp = {
     }
   },
 
-  /**
-   * Gets personnel data for the app.
-   * @returns {Array<Object>} An array of objects with personnel data.
-   */
   getPersonnel: function() {
     try {
       return personnelSheet.getData();
@@ -151,10 +116,6 @@ const fabricationApp = {
     }
   },
 
-  /**
-   * Opens the fabrication app with pre-populated data for editing.
-   * @param {string} logId - The unique log ID to restore data from
-   */
   openForEdit: function(logId) {
     const formData = projectSheet.getLoggedFormData(logId, 'FabricationLog');
     if (formData) {
@@ -162,7 +123,6 @@ const fabricationApp = {
           .setWidth(750)
           .setHeight(850);
       
-      // Pass the form data to the client
       const htmlContent = htmlOutput.getContent();
       const modifiedContent = htmlContent.replace(
         '<script>',
@@ -180,11 +140,6 @@ const fabricationApp = {
     }
   },
 
-  /**
-   * Adds a fabrication item to the project sheet.
-   * @param {Object} fabricationData - Object containing description, dimensions, totalPrice, and formData
-   * @returns {Object} Result object with success status and message
-   */
   addToProject: function(fabricationData) {
     try {
       return projectSheet.addProjectItem(fabricationData, 'FAB', 'FabricationLog');
@@ -200,11 +155,8 @@ const fabricationApp = {
   }
 };
 
-// An object to namespace all functions related to the apparel estimate application.
+// An object to namespace all functions related to the apparel application.
 const apparelApp = {
-  /**
-   * Opens the modal dialog for the apparel estimate application.
-   */
   showDialog: function() {
     const htmlOutput = HtmlService.createHtmlOutputFromFile('ApparelIndex')
         .setWidth(750)
@@ -213,10 +165,6 @@ const apparelApp = {
     ui.showModalDialog(htmlOutput, 'Apparel / Screen Printing');
   },
 
-  /**
-   * Opens the apparel app with pre-populated data for editing.
-   * @param {string} logId - The unique log ID to restore data from
-   */
   openForEdit: function(logId) {
     const formData = projectSheet.getLoggedFormData(logId, 'ApparelLog');
     if (formData) {
@@ -224,7 +172,6 @@ const apparelApp = {
           .setWidth(750)
           .setHeight(850);
       
-      // Pass the form data to the client
       const htmlContent = htmlOutput.getContent();
       const modifiedContent = htmlContent.replace(
         '<script>',
@@ -236,17 +183,12 @@ const apparelApp = {
           .setHeight(850);
       
       const ui = SpreadsheetApp.getUi();
-      ui.showModalDialog(modifiedOutput, 'Edit Apparel Estimate');
+      ui.showModalDialog(modifiedOutput, 'Edit Apparel');
     } else {
       this.showDialog();
     }
   },
 
-  /**
-   * Adds an apparel estimate to the project sheet.
-   * @param {Object} apparelData - Object containing description, quantity, totalPrice, and formData
-   * @returns {Object} Result object with success status and message
-   */
   addToProject: function(apparelData) {
     try {
       return projectSheet.addProjectItem(apparelData, 'APP', 'ApparelLog');
@@ -262,30 +204,107 @@ const apparelApp = {
   }
 };
 
+// An object to namespace all functions related to the printing estimate application.
+const printingApp = {
+  showDialog: function() {
+    const htmlOutput = HtmlService.createHtmlOutputFromFile('PrintingIndex')
+        .setWidth(500)
+        .setHeight(700);
+    const ui = SpreadsheetApp.getUi();
+    ui.showModalDialog(htmlOutput, 'PrintCut Estimate');
+  },
+
+  getMaterials: function() {
+    try {
+      const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Materials');
+      if (!sheet) {
+        console.error("Sheet 'Materials' not found. Please ensure a sheet with this exact name exists in the current spreadsheet.");
+        return [];
+      }
+      
+      const range = sheet.getRange('A2:P' + sheet.getLastRow());
+      const values = range.getValues();
+      
+      return values
+        .filter(row => {
+          const name = row[1];
+          const primaryCategory = row[4];
+          return name && name.toString().trim() !== "" && primaryCategory && primaryCategory.toString().includes('PRINT');
+        })
+        .map(row => {
+          const name = row[1].toString().trim();
+          const type = row[2] ? row[2].toString().trim() : 'Sheet';
+          const width = parseFloat(row[10]) || 0;
+          const height = parseFloat(row[11]) || 0;
+          
+          let sheetCost = row[9];
+          if (sheetCost && typeof sheetCost === 'string') {
+            const cleanedCost = parseFloat(sheetCost.replace(/[^0-9.-]+/g,""));
+            sheetCost = isNaN(cleanedCost) ? 0 : cleanedCost;
+          } else if (typeof sheetCost !== 'number') {
+            sheetCost = 0;
+          }
+          
+          const linFtCost = sheetCost;
+
+          return [name, type, width, height, sheetCost, linFtCost];
+        });
+    } catch (e) {
+      console.error("Error in printingApp.getMaterials: " + e.toString());
+      return [];
+    }
+  },
+
+  openForEdit: function(logId) {
+    const formData = projectSheet.getLoggedFormData(logId, 'PrintingLog');
+    if (formData) {
+      const htmlOutput = HtmlService.createHtmlOutputFromFile('PrintingIndex')
+          .setWidth(500)
+          .setHeight(700);
+      
+      const htmlContent = htmlOutput.getContent();
+      const modifiedContent = htmlContent.replace(
+        '<script>',
+        `<script>window.editFormData = ${JSON.stringify(formData)};`
+      );
+      
+      const modifiedOutput = HtmlService.createHtmlOutput(modifiedContent)
+          .setWidth(500)
+          .setHeight(700);
+      
+      const ui = SpreadsheetApp.getUi();
+      ui.showModalDialog(modifiedOutput, 'Edit PrintCut Estimate');
+    } else {
+      this.showDialog();
+    }
+  },
+
+  addToProject: function(printingData) {
+    try {
+      return projectSheet.addProjectItem(printingData, 'PRT', 'PrintingLog');
+    } catch (e) {
+      console.error("Error in printingApp.addToProject: " + e.toString());
+      return {
+        success: false,
+        message: `Error adding to project: ${e.toString()}`,
+        rowNumber: null,
+        logId: null
+      };
+    }
+  }
+};
+
 // An object to namespace all functions related to project data management.
 const projectSheet = {
-  /**
-   * Gets the active sheet (assumes it's the project sheet where data should be written).
-   * @returns {GoogleAppsScript.Spreadsheet.Sheet} The active sheet object.
-   */
   getActiveSheet: function() {
     return SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
   },
 
-  /**
-   * Logs form data to a hidden sheet for edit functionality.
-   * @param {Object} formData - Complete form data
-   * @param {number} projectRowNumber - The row number in the project sheet
-   * @param {string} logIdPrefix - Prefix for the log ID (e.g., 'FAB', 'APP')
-   * @param {string} logSheetName - Name of the log sheet (e.g., 'FabricationLog', 'ApparelLog')
-   * @returns {string} Unique log ID
-   */
   logFormData: function(formData, projectRowNumber, logIdPrefix, logSheetName) {
     try {
       const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
       let logSheet = spreadsheet.getSheetByName(logSheetName);
       
-      // Create log sheet if it doesn't exist
       if (!logSheet) {
         logSheet = spreadsheet.insertSheet(logSheetName);
         logSheet.hideSheet();
@@ -294,22 +313,18 @@ const projectSheet = {
         ]);
       }
       
-      // Generate unique log ID
       const logId = `${logIdPrefix}_${Date.now()}_${projectRowNumber}`;
       const timestamp = new Date();
       
-      // Add original row number to form data for edit tracking
       const formDataWithRow = {
         ...formData,
         originalRowNumber: projectRowNumber
       };
       const formDataJson = JSON.stringify(formDataWithRow);
       
-      // Find next empty row in log sheet
       const lastLogRow = logSheet.getLastRow();
       const nextLogRow = lastLogRow + 1;
       
-      // Write log data
       logSheet.getRange(nextLogRow, 1, 1, 4).setValues([
         [logId, projectRowNumber, timestamp, formDataJson]
       ]);
@@ -322,14 +337,6 @@ const projectSheet = {
     }
   },
 
-  /**
-   * Updates existing log data for an edited item.
-   * @param {Object} formData - Complete form data
-   * @param {number} projectRowNumber - The row number in the project sheet
-   * @param {string} logIdPrefix - Prefix for the log ID (e.g., 'FAB', 'APP')
-   * @param {string} logSheetName - Name of the log sheet
-   * @returns {string} Updated log ID
-   */
   updateLogFormData: function(formData, projectRowNumber, logIdPrefix, logSheetName) {
     try {
       const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
@@ -342,7 +349,6 @@ const projectSheet = {
       const dataRange = logSheet.getDataRange();
       const values = dataRange.getValues();
       
-      // Find existing log entry for this row
       let existingRowIndex = -1;
       for (let i = 1; i < values.length; i++) {
         if (values[i][1] === projectRowNumber) {
@@ -351,7 +357,6 @@ const projectSheet = {
         }
       }
       
-      // Generate new log ID with current timestamp
       const logId = `${logIdPrefix}_${Date.now()}_${projectRowNumber}`;
       const timestamp = new Date();
       
@@ -381,12 +386,6 @@ const projectSheet = {
     }
   },
 
-  /**
-   * Retrieves logged form data by log ID.
-   * @param {string} logId - The unique log ID
-   * @param {string} logSheetName - Name of the log sheet to search
-   * @returns {Object|null} Form data object or null if not found
-   */
   getLoggedFormData: function(logId, logSheetName) {
     try {
       const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
@@ -414,19 +413,10 @@ const projectSheet = {
     }
   },
 
-  /**
-   * Creates an edit instruction for the spreadsheet.
-   * @param {string} logId - The unique log ID
-   * @returns {string} Edit instruction text
-   */
   createEditInstruction: function(logId) {
     return "Edit";
   },
 
-  /**
-   * Generates the next sequential ID for fabrication items
-   * @returns {string} Next fabrication ID (e.g., F01, F02, F03)
-   */
   getNextFabricationId: function() {
     const sheet = this.getActiveSheet();
     const dataRange = sheet.getDataRange();
@@ -434,9 +424,8 @@ const projectSheet = {
     
     let maxNumber = 0;
     
-    // Look through column B for existing fabrication IDs
-    for (let i = 1; i < values.length; i++) { // Start from row 2 (index 1)
-      const cellValue = values[i][1]; // Column B (index 1)
+    for (let i = 1; i < values.length; i++) {
+      const cellValue = values[i][1];
       if (cellValue && typeof cellValue === 'string' && cellValue.startsWith('F')) {
         const numberPart = cellValue.substring(1);
         const number = parseInt(numberPart);
@@ -446,14 +435,54 @@ const projectSheet = {
       }
     }
     
-    // Generate next ID with zero padding
     const nextNumber = maxNumber + 1;
     return `F${nextNumber.toString().padStart(2, '0')}`;
   },
 
-  /**
-   * Updates an existing project item in the sheet.
-   */
+  getNextApparelId: function() {
+    const sheet = this.getActiveSheet();
+    const dataRange = sheet.getDataRange();
+    const values = dataRange.getValues();
+    
+    let maxNumber = 0;
+    
+    for (let i = 1; i < values.length; i++) {
+      const cellValue = values[i][1];
+      if (cellValue && typeof cellValue === 'string' && cellValue.startsWith('AP')) {
+        const numberPart = cellValue.substring(2);
+        const number = parseInt(numberPart);
+        if (!isNaN(number) && number > maxNumber) {
+          maxNumber = number;
+        }
+      }
+    }
+    
+    const nextNumber = maxNumber + 1;
+    return `AP${nextNumber.toString().padStart(2, '0')}`;
+  },
+
+  getNextPrintingId: function() {
+    const sheet = this.getActiveSheet();
+    const dataRange = sheet.getDataRange();
+    const values = dataRange.getValues();
+    
+    let maxNumber = 0;
+    
+    for (let i = 1; i < values.length; i++) {
+      const cellValue = values[i][1];
+      if (cellValue && typeof cellValue === 'string' && cellValue.startsWith('PR')) {
+        const numberPart = cellValue.substring(2);
+        const number = parseInt(numberPart);
+        if (!isNaN(number) && number > maxNumber) {
+          maxNumber = number;
+        }
+      }
+    }
+    
+    const nextNumber = maxNumber + 1;
+    return `PR${nextNumber.toString().padStart(2, '0')}`;
+  },
+
   updateProjectItem: function(itemData, logIdPrefix, logSheetName) {
     try {
       const sheet = this.getActiveSheet();
@@ -477,54 +506,77 @@ const projectSheet = {
       const logId = this.updateLogFormData(formData, rowNum, logIdPrefix, logSheetName);
       
       let rowData;
+      let editColumnIndex;
       
-      // Different column layouts for different app types
       if (logIdPrefix === 'FAB') {
-        // Fabrication: A=empty, B=ID (preserve existing), C=Description, D=Dimensions, E=empty, F=Total Price, G=Edit
         const existingId = sheet.getRange(rowNum, 2).getValue() || this.getNextFabricationId();
         rowData = [
-          '',                           // Column A (empty)
-          existingId,                   // Column B (preserve existing ID)
-          description || '',            // Column C (Description)
-          dimensions || '',             // Column D (Dimensions)  
-          '',                           // Column E (empty)
-          totalPrice || 0,              // Column F (Total Price)
-          'Edit'                        // Column G (Edit - preserve)
+          '',
+          existingId,
+          description || '',
+          dimensions || '',
+          '',
+          totalPrice || 0,
+          'Edit'
         ];
+        editColumnIndex = 7;
         
-        // Write to columns A-F only, preserve G
         const range = sheet.getRange(rowNum, 1, 1, 6);
         range.setValues([rowData.slice(0, 6)]);
         
-        // Format the total price as currency
-        const priceCell = sheet.getRange(rowNum, 6); // Column F
+        const priceCell = sheet.getRange(rowNum, 6);
         priceCell.setNumberFormat('$#,##0.00');
         
-        // Update the edit cell note
-        if (logId) {
-          const editCell = sheet.getRange(rowNum, 7); // Column G
-          editCell.setNote(`LogID: ${logId}\n\nTo edit this item:\n1. Select this cell\n2. Go to Production > Edit Selected Item\n\nLast updated: ${new Date().toLocaleString()}`);
-        }
+      } else if (logIdPrefix === 'APP') {
+        const existingId = sheet.getRange(rowNum, 2).getValue() || this.getNextApparelId();
+        const unitPrice = quantity && quantity > 0 ? (totalPrice / quantity) : 0;
         
-      } else {
-        // Apparel and other apps: A=Description, B=Quantity, C=empty, D=Total Price, E=Edit
         rowData = [
+          '',
+          existingId,
           description || '',
           quantity || '',
-          '',
-          totalPrice || 0
+          unitPrice,
+          totalPrice || 0,
+          'Edit'
         ];
+        editColumnIndex = 7;
         
-        const range = sheet.getRange(rowNum, 1, 1, 4);
-        range.setValues([rowData]);
+        const range = sheet.getRange(rowNum, 1, 1, 6);
+        range.setValues([rowData.slice(0, 6)]);
         
-        const priceCell = sheet.getRange(rowNum, 4);
-        priceCell.setNumberFormat('$#,##0.00');
+        const unitPriceCell = sheet.getRange(rowNum, 5);
+        const totalPriceCell = sheet.getRange(rowNum, 6);
+        unitPriceCell.setNumberFormat('$#,##0.00');
+        totalPriceCell.setNumberFormat('$#,##0.00');
         
-        if (logId) {
-          const editCell = sheet.getRange(rowNum, 5);
-          editCell.setNote(`LogID: ${logId}\n\nTo edit this item:\n1. Select this cell\n2. Go to Production > Edit Selected Item\n\nLast updated: ${new Date().toLocaleString()}`);
-        }
+      } else if (logIdPrefix === 'PRT') {
+        const existingId = sheet.getRange(rowNum, 2).getValue() || this.getNextPrintingId();
+        const unitPrice = quantity && quantity > 0 ? (totalPrice / quantity) : 0;
+        
+        rowData = [
+          '',
+          existingId,
+          description || '',
+          quantity || '',
+          unitPrice,
+          totalPrice || 0,
+          'Edit'
+        ];
+        editColumnIndex = 7;
+        
+        const range = sheet.getRange(rowNum, 1, 1, 6);
+        range.setValues([rowData.slice(0, 6)]);
+        
+        const unitPriceCell = sheet.getRange(rowNum, 5);
+        const totalPriceCell = sheet.getRange(rowNum, 6);
+        unitPriceCell.setNumberFormat('$#,##0.00');
+        totalPriceCell.setNumberFormat('$#,##0.00');
+      }
+      
+      if (logId) {
+        const editCell = sheet.getRange(rowNum, editColumnIndex);
+        editCell.setNote(`LogID: ${logId}\n\nTo edit this item:\n1. Select this cell\n2. Go to Production > Edit Selected Item\n\nLast updated: ${new Date().toLocaleString()}`);
       }
       
       return {
@@ -547,9 +599,6 @@ const projectSheet = {
     }
   },
 
-  /**
-   * Adds a new project item to the sheet or updates existing one.
-   */
   addProjectItem: function(itemData, logIdPrefix, logSheetName) {
     try {
       let originalRowNumber = null;
@@ -585,42 +634,70 @@ const projectSheet = {
       let rowData;
       let editColumnIndex;
       
-      // Different column layouts for different app types
       if (logIdPrefix === 'FAB') {
-        // Fabrication: A=empty, B=Auto ID, C=Description, D=Dimensions, E=empty, F=Total Price, G=Edit
         const fabricationId = this.getNextFabricationId();
         rowData = [
-          '',                           // Column A (empty)
-          fabricationId,                // Column B (Auto-generated ID)
-          description || '',            // Column C (Description)
-          dimensions || '',             // Column D (Dimensions)
-          '',                           // Column E (empty)
-          totalPrice || 0,              // Column F (Total Price)
-          editInstruction               // Column G (Edit)
-        ];
-        editColumnIndex = 7; // Column G
-      } else {
-        // Apparel and other apps: A=Description, B=Quantity, C=empty, D=Total Price, E=Edit
-        rowData = [
+          '',
+          fabricationId,
           description || '',
-          quantity || '',
+          dimensions || '',
           '',
           totalPrice || 0,
           editInstruction
         ];
-        editColumnIndex = 5; // Column E
-      }
-      
-      const range = sheet.getRange(nextRow, 1, 1, rowData.length);
-      range.setValues([rowData]);
-      
-      // Format the total price as currency
-      if (logIdPrefix === 'FAB') {
-        const priceCell = sheet.getRange(nextRow, 6); // Column F for fabrication
+        editColumnIndex = 7;
+        
+        const range = sheet.getRange(nextRow, 1, 1, rowData.length);
+        range.setValues([rowData]);
+        
+        const priceCell = sheet.getRange(nextRow, 6);
         priceCell.setNumberFormat('$#,##0.00');
-      } else {
-        const priceCell = sheet.getRange(nextRow, 4); // Column D for apparel
-        priceCell.setNumberFormat('$#,##0.00');
+        
+      } else if (logIdPrefix === 'APP') {
+        const apparelId = this.getNextApparelId();
+        const unitPrice = quantity && quantity > 0 ? (totalPrice / quantity) : 0;
+        
+        rowData = [
+          '',
+          apparelId,
+          description || '',
+          quantity || '',
+          unitPrice,
+          totalPrice || 0,
+          editInstruction
+        ];
+        editColumnIndex = 7;
+        
+        const range = sheet.getRange(nextRow, 1, 1, rowData.length);
+        range.setValues([rowData]);
+        
+        const unitPriceCell = sheet.getRange(nextRow, 5);
+        const totalPriceCell = sheet.getRange(nextRow, 6);
+        unitPriceCell.setNumberFormat('$#,##0.00');
+        totalPriceCell.setNumberFormat('$#,##0.00');
+        
+      } else if (logIdPrefix === 'PRT') {
+        const printingId = this.getNextPrintingId();
+        const unitPrice = quantity && quantity > 0 ? (totalPrice / quantity) : 0;
+        
+        rowData = [
+          '',
+          printingId,
+          description || '',
+          quantity || '',
+          unitPrice,
+          totalPrice || 0,
+          editInstruction
+        ];
+        editColumnIndex = 7;
+        
+        const range = sheet.getRange(nextRow, 1, 1, rowData.length);
+        range.setValues([rowData]);
+        
+        const unitPriceCell = sheet.getRange(nextRow, 5);
+        const totalPriceCell = sheet.getRange(nextRow, 6);
+        unitPriceCell.setNumberFormat('$#,##0.00');
+        totalPriceCell.setNumberFormat('$#,##0.00');
       }
       
       if (logId) {
@@ -652,93 +729,76 @@ const projectSheet = {
   }
 };
 
-/**
- * Creates a custom menu in the UI when the spreadsheet is opened.
- */
 function onOpen() {
   const ui = SpreadsheetApp.getUi();
   ui.createMenu('Production')
       .addItem('Fabrication', 'openFabricationApp')
-      .addItem('Apparel Estimate', 'openApparelApp')
+      .addItem('Apparel', 'openApparelApp')
+      .addItem('Printing', 'openPrintingApp')
       .addSeparator()
       .addItem('Edit Selected Item', 'editSelectedItem')
       .addToUi();
 }
 
-/**
- * Global function to open the fabrication app.
- */
 function openFabricationApp() {
   fabricationApp.showDialog();
 }
 
-/**
- * Global function to open the apparel app.
- */
 function openApparelApp() {
   apparelApp.showDialog();
 }
 
-/**
- * Global function for fabrication app to get materials data.
- */
+function openPrintingApp() {
+  printingApp.showDialog();
+}
+
 function getMaterials() {
   return fabricationApp.getMaterials();
 }
 
-/**
- * Global function for fabrication app to get personnel data.
- */
 function getPersonnel() {
   return fabricationApp.getPersonnel();
 }
 
-/**
- * Global function for fabrication app to add data to project.
- */
+function getPrintingMaterials() {
+  return printingApp.getMaterials();
+}
+
 function addFabricationToProject(fabricationData) {
   return fabricationApp.addToProject(fabricationData);
 }
 
-/**
- * Global function for apparel app to add data to project.
- */
 function addApparelToProject(apparelData) {
   return apparelApp.addToProject(apparelData);
 }
 
-/**
- * Global function to open fabrication app for editing with specific log ID.
- */
+function addPrintingToProject(printingData) {
+  return printingApp.addToProject(printingData);
+}
+
 function openFabricationAppForEdit(logId) {
   return fabricationApp.openForEdit(logId);
 }
 
-/**
- * Global function to open apparel app for editing with specific log ID.
- */
 function openApparelAppForEdit(logId) {
   return apparelApp.openForEdit(logId);
 }
 
-/**
- * Global function to get logged form data by ID and sheet name.
- */
+function openPrintingAppForEdit(logId) {
+  return printingApp.openForEdit(logId);
+}
+
 function getLoggedFormData(logId, logSheetName) {
   return projectSheet.getLoggedFormData(logId, logSheetName);
 }
 
-/**
- * Function to edit the selected item from the menu.
- */
 function editSelectedItem() {
   try {
     const sheet = SpreadsheetApp.getActiveSheet();
     const activeCell = sheet.getActiveCell();
     
-    // Check if the selected cell is in the edit column and has a note with LogID
     const column = activeCell.getColumn();
-    if (column !== 5 && column !== 7) { // Column E (5) for apparel, Column G (7) for fabrication
+    if (column !== 7) {
       SpreadsheetApp.getUi().alert(
         'Edit Item', 
         'Please select an "Edit" cell first, then try again.',
@@ -773,6 +833,8 @@ function editSelectedItem() {
       fabricationApp.openForEdit(logId);
     } else if (logId.startsWith('APP_')) {
       apparelApp.openForEdit(logId);
+    } else if (logId.startsWith('PRT_')) {
+      printingApp.openForEdit(logId);
     } else {
       SpreadsheetApp.getUi().alert(
         'Edit Item', 
