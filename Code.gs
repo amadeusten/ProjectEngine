@@ -16,36 +16,56 @@ const materialsSheet = {
     return sheet;
   },
 
-  getData: function() {
+  getData: function(category = 'FABRICATION') {
     const sheet = this.getSheet();
     if (!sheet) {
       return [];
     }
     const range = sheet.getRange('A2:P' + sheet.getLastRow());
     const values = range.getValues();
-    
-    return values
+
+    const filteredValues = values
       .filter(row => {
         const name = row[1];
         const primaryCategory = row[4];
-        return name && name.toString().trim() !== "" && primaryCategory && primaryCategory.toString().includes('FABRICATION');
-      })
-      .map(row => {
-        const name = row[1].toString().trim();
-        let unitCost = row[9];
-        
-        if (unitCost && typeof unitCost === 'string') {
-          const cleanedCost = parseFloat(unitCost.replace(/[^0-9.-]+/g,""));
-          unitCost = isNaN(cleanedCost) ? 0 : cleanedCost;
-        } else if (typeof unitCost !== 'number') {
-          unitCost = 0;
-        }
-
-        return {
-          name: name,
-          unitCost: unitCost
-        };
+        return name && name.toString().trim() !== "" && primaryCategory && primaryCategory.toString().toUpperCase().includes(category);
       });
+
+    if (category === 'PRINT') {
+        return filteredValues.map(row => {
+            const name = row[1].toString().trim();
+            const type = row[2] ? row[2].toString().trim().toUpperCase() : 'SHEET';
+            const width = parseFloat(row[7]) || 0; // Column H
+            const length = parseFloat(row[8]) || 0; // Column I
+            let sheetCost = row[9]; // Column J
+
+            if (sheetCost && typeof sheetCost === 'string') {
+                const cleanedCost = parseFloat(sheetCost.replace(/[^0-9.-]+/g,""));
+                sheetCost = isNaN(cleanedCost) ? 0 : cleanedCost;
+            } else if (typeof sheetCost !== 'number') {
+                sheetCost = 0;
+            }
+            
+            // The front-end now handles the linear foot cost calculation.
+            // We pass the raw data it needs: [name, type, width, length, unitCost]
+            return [name, type, width, length, sheetCost];
+        });
+    } else { // 'FABRICATION' and default
+        return filteredValues.map(row => {
+            const name = row[1].toString().trim();
+            let unitCost = row[9];
+            if (unitCost && typeof unitCost === 'string') {
+                const cleanedCost = parseFloat(unitCost.replace(/[^0-9.-]+/g,""));
+                unitCost = isNaN(cleanedCost) ? 0 : cleanedCost;
+            } else if (typeof unitCost !== 'number') {
+                unitCost = 0;
+            }
+            return {
+              name: name,
+              unitCost: unitCost
+            };
+        });
+    }
   }
 };
 
@@ -100,7 +120,7 @@ const fabricationApp = {
 
   getMaterials: function() {
     try {
-      return materialsSheet.getData();
+      return materialsSheet.getData('FABRICATION');
     } catch (e) {
       console.error("Error in fabricationApp.getMaterials: " + e.toString());
       return [];
@@ -208,47 +228,15 @@ const apparelApp = {
 const printingApp = {
   showDialog: function() {
     const htmlOutput = HtmlService.createHtmlOutputFromFile('PrintingIndex')
-        .setWidth(500)
-        .setHeight(700);
+        .setWidth(750)
+        .setHeight(850);
     const ui = SpreadsheetApp.getUi();
     ui.showModalDialog(htmlOutput, 'PrintCut Estimate');
   },
 
   getMaterials: function() {
     try {
-      const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Materials');
-      if (!sheet) {
-        console.error("Sheet 'Materials' not found. Please ensure a sheet with this exact name exists in the current spreadsheet.");
-        return [];
-      }
-      
-      const range = sheet.getRange('A2:P' + sheet.getLastRow());
-      const values = range.getValues();
-      
-      return values
-        .filter(row => {
-          const name = row[1];
-          const primaryCategory = row[4];
-          return name && name.toString().trim() !== "" && primaryCategory && primaryCategory.toString().includes('PRINT');
-        })
-        .map(row => {
-          const name = row[1].toString().trim();
-          const type = row[2] ? row[2].toString().trim() : 'Sheet';
-          const width = parseFloat(row[10]) || 0;
-          const height = parseFloat(row[11]) || 0;
-          
-          let sheetCost = row[9];
-          if (sheetCost && typeof sheetCost === 'string') {
-            const cleanedCost = parseFloat(sheetCost.replace(/[^0-9.-]+/g,""));
-            sheetCost = isNaN(cleanedCost) ? 0 : cleanedCost;
-          } else if (typeof sheetCost !== 'number') {
-            sheetCost = 0;
-          }
-          
-          const linFtCost = sheetCost;
-
-          return [name, type, width, height, sheetCost, linFtCost];
-        });
+      return materialsSheet.getData('PRINT');
     } catch (e) {
       console.error("Error in printingApp.getMaterials: " + e.toString());
       return [];
@@ -259,8 +247,8 @@ const printingApp = {
     const formData = projectSheet.getLoggedFormData(logId, 'PrintingLog');
     if (formData) {
       const htmlOutput = HtmlService.createHtmlOutputFromFile('PrintingIndex')
-          .setWidth(500)
-          .setHeight(700);
+          .setWidth(750)
+          .setHeight(850);
       
       const htmlContent = htmlOutput.getContent();
       const modifiedContent = htmlContent.replace(
@@ -269,8 +257,8 @@ const printingApp = {
       );
       
       const modifiedOutput = HtmlService.createHtmlOutput(modifiedContent)
-          .setWidth(500)
-          .setHeight(700);
+          .setWidth(750)
+          .setHeight(850);
       
       const ui = SpreadsheetApp.getUi();
       ui.showModalDialog(modifiedOutput, 'Edit PrintCut Estimate');
@@ -852,3 +840,4 @@ function editSelectedItem() {
     );
   }
 }
+
